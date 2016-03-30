@@ -92,7 +92,7 @@ jsonobj.each do |k, v|
     trecs = v.select {|i| i['id'] == 0}
     totchs = trecs[0] if trecs.count == 1                                   
     # puts "\n\tSummarizing: #{totchs.inspect}\n\n"
-    puts "#{v.size-1} champions, #{winloss(totchs['stats'])} )\n"
+    puts "Ranked results with #{v.size-1} champions, #{winloss(totchs['stats'])} )\n"
     # puts "keys: #{v[0].keys} statkeys: #{v[0]['stats'].keys}\n"
     v.sort! {|a, b| b['stats']['totalSessionsWon'] <=> a['stats']['totalSessionsWon'] }
     v.each do |ch|
