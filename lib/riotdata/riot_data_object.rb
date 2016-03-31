@@ -49,10 +49,11 @@ module RiotData
       return form_uri( url, params )
     end
 
-    def self.get_json( uri )
+    def self.fetch_response( uri )
+      unless uri.is_a?( URI::HTTPS ) then raise "bad uri for data request"; end
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
-      puts "\tFetching URI: #{uri.to_s}"
+      # puts "\n\tFetching URI: #{uri.to_s}"
       http.get(uri.request_uri)
     end
 
