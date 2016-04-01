@@ -16,7 +16,7 @@ module RiotData
     end
 
     def run
-      s = Summoner.new
+      s = Summoner.new( 31287954 )  # summoner: grandfromage
       puts "\tSummonerID: #{s.summ_id}"
       s.ranked_champ_stats
     end
