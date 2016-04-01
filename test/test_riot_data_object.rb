@@ -9,6 +9,11 @@ require 'json'
 
 class TestRiotDataObject < Test::Unit::TestCase
 
+  RDO = RiotData::RiotDataObject
+  
+  def setup
+  end
+  
   def test_should_be_able_to_set_api_key
     key = get_fake_key
     assert set_api_key(key)
@@ -77,6 +82,14 @@ class TestRiotDataObject < Test::Unit::TestCase
     assert JSON.parse( res.body ).is_a?( Hash ), "successful response should be parsable into a ruby hash"
   end
 
+  def test_should_convert_riot_time
+    rtime = 1459520093000
+    assert d = RDO.convert_riot_time( rtime )
+    assert d.is_a?( DateTime )
+    assert_equal( "2016-Apr-01", d.strftime('%Y-%b-%d') )
+    # TODO - also fix the hour/min issue - there's some time zone handling to do
+  end
+  
   private
 
   def get_valid_key

@@ -13,6 +13,7 @@
 #
 
 require 'net/http'
+require 'date'
 
 module RiotData
   REGION = '/na'.freeze
@@ -64,16 +65,24 @@ module RiotData
       # TODO - implement some error handling here
     end
 
-    def self.merge_keyparam( h )
-      unless h.is_a?( Hash ) && api_key? then return nil; end
-      h.merge( {:api_key => @@api_key} )
+    def self.convert_riot_time( fnum )
+      raise "riot time needed as fixnum for conversion" unless fnum.is_a?( Fixnum )
+      DateTime.strptime( fnum.to_s[0...-3], '%s')  # riot stores in milliseconds from epoch
+      # TODO - there's a time zone bug or something.. we're close but not accurate to hour.
     end
-
+    
+    # private class methods:
+    
     def self.form_uri( url, params )
       uri = URI( url )
       unless p = merge_keyparam(params) then raise "bad data request param hash, or no api_key"; end
       uri.query = URI.encode_www_form(p)
       return uri
+    end
+
+    def self.merge_keyparam( h )
+      unless h.is_a?( Hash ) && api_key? then return nil; end
+      h.merge( {:api_key => @@api_key} )
     end
 
     def self.load_champs
@@ -84,7 +93,7 @@ module RiotData
       champions['data'].each {|k, v| @@champ_data[v['id']] = v['name'] }
       return @@champ_data
     end
-    
+
     private_class_method :merge_keyparam, :form_uri, :load_champs
     
   end

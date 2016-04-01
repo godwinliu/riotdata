@@ -7,11 +7,13 @@ require 'json'
 
 module RiotData
   class Summoner < RiotDataObject
+    SUMMONER_PATH = '/v1.4/summoner/'.freeze
     SUMMONER_STATS_PATH = '/v1.3/stats/by-summoner/'.freeze
-    attr_reader :summ_id
+    attr_reader :summ_id, :summ_obj
     
     def initialize( summ_id = 31287954 )
       @summ_id = summ_id
+      load_summoner
     end
 
     # return array with hash per champ in the current ranked season
@@ -19,7 +21,7 @@ module RiotData
     def ranked_champ_stats
       rcs = ranked_champs
       summ = rcs.select {|v| v[:id]==0}
-      puts "\nRanked results with #{rcs.size-1} champions, #{winloss(summ[0])}\n"
+      puts "\nRanked results for #{@summ_obj[:name]} at #{@summ_obj[:revdate].strftime('%Y%b%d-%l:%M%P')} with #{rcs.size-1} champions, #{winloss(summ[0])}:\n"
 
       rcs.sort! {|a, b| b[:wins] <=> a[:wins] }
       rcs.each do |c|
@@ -30,6 +32,28 @@ module RiotData
     end
 
     private
+
+    # load the base summoner data
+    #    TODO - handle summoner not found
+    #    TODO - handle forbidden/denied response
+    def load_summoner
+      uri = Summoner.api_uri( SUMMONER_PATH + @summ_id.to_s )
+      r = Summoner.fetch_response( uri, true )
+      ro = JSON.parse(r.body)
+      raise "malformed summoner data response" unless ro.size == 1
+      @summ_obj = parse_summoner(ro.values.first)
+    end
+    
+    def parse_summoner( summ_rdata )
+      raise "can't parse summoner data" unless summ_rdata.is_a?( Hash )
+      o = Hash.new
+      o[:id] = summ_rdata['id']
+      o[:name] = summ_rdata['name']
+      o[:ppic] = summ_rdata['profileIconId']
+      o[:level] = summ_rdata['summonerLevel']
+      o[:revdate] = Summoner.convert_riot_time( summ_rdata[ 'revisionDate'])
+      return o
+    end
 
     def ranked_champs
       uri = Summoner.api_uri( SUMMONER_STATS_PATH + @summ_id.to_s + '/ranked' )
