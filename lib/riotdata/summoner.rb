@@ -9,11 +9,11 @@ module RiotData
   class Summoner < RiotDataObject
     SUMMONER_PATH = '/v1.4/summoner/'.freeze
     SUMMONER_STATS_PATH = '/v1.3/stats/by-summoner/'.freeze
-    attr_reader :summ_id, :summ_obj
+    attr_reader :summ_id, :riot_id, :name, :ppic, :level, :revdate
     
-    def initialize( summ_id = 31287954 )
+    def initialize( summ_id = 31287954, load_remote = true )
       @summ_id = summ_id
-      load_summoner
+      load_summoner( load_remote )
     end
 
     # return array with hash per champ in the current ranked season
@@ -21,7 +21,7 @@ module RiotData
     def ranked_champ_stats
       rcs = ranked_champs
       summ = rcs.select {|v| v[:id]==0}
-      puts "\nRanked results for #{@summ_obj[:name]} at #{@summ_obj[:revdate].strftime('%Y%b%d-%l:%M%P')} with #{rcs.size-1} champions, #{winloss(summ[0])}:\n"
+      puts "\nRanked results for #{name} (at #{revdate.strftime('%Y%b%d,%l:%M%P')}) with #{rcs.size-1} champions, #{winloss(summ[0])}:\n"
 
       rcs.sort! {|a, b| b[:wins] <=> a[:wins] }
       rcs.each do |c|
@@ -36,23 +36,22 @@ module RiotData
     # load the base summoner data
     #    TODO - handle summoner not found
     #    TODO - handle forbidden/denied response
-    def load_summoner
+    def load_summoner( use_remote )
+      return unless use_remote
       uri = Summoner.api_uri( SUMMONER_PATH + @summ_id.to_s )
       r = Summoner.fetch_response( uri, true )
       ro = JSON.parse(r.body)
       raise "malformed summoner data response" unless ro.size == 1
-      @summ_obj = parse_summoner(ro.values.first)
+      parse_summoner(ro.values.first)
     end
     
     def parse_summoner( summ_rdata )
       raise "can't parse summoner data" unless summ_rdata.is_a?( Hash )
-      o = Hash.new
-      o[:id] = summ_rdata['id']
-      o[:name] = summ_rdata['name']
-      o[:ppic] = summ_rdata['profileIconId']
-      o[:level] = summ_rdata['summonerLevel']
-      o[:revdate] = Summoner.convert_riot_time( summ_rdata[ 'revisionDate'])
-      return o
+      @riot_id = summ_rdata['id']
+      @name = summ_rdata['name']
+      @ppic = summ_rdata['profileIconId']
+      @level = summ_rdata['summonerLevel']
+      @revdate = Summoner.convert_riot_time( summ_rdata[ 'revisionDate'])
     end
 
     def ranked_champs
