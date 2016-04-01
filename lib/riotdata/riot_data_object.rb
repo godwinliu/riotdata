@@ -19,11 +19,13 @@ module RiotData
   SERVER_URL = 'https://na.api.pvp.net'.freeze
   API_PATH = '/api/lol'.freeze
   STATIC_DATA_PATH = '/api/lol/static-data'.freeze
-
+  CHAMP_DATA_URL = '/v1.2/champion'.freeze
+  
   class RiotDataObject
 
     # class variables
-    @@api_key = nil   # => the application will only use a single key, for all data objects
+    @@api_key = nil    # the application will only use a single key, for all data objects
+    @@champ_data = nil # cache the static data relating to champions for use by all subclasses
     
     # class methods
     def self.api_key=( key )
@@ -38,7 +40,11 @@ module RiotData
     # def self.api_key
     #  @@api_key
     # end
-    
+
+    def self.champs  # accessor for all static champ data
+      @@champ_data || load_champs
+    end
+      
     def self.static_uri( path, params = {} )
       url = SERVER_URL + STATIC_DATA_PATH + REGION + path
       return form_uri( url, params )
@@ -49,15 +55,14 @@ module RiotData
       return form_uri( url, params )
     end
 
-    def self.fetch_response( uri )
+    def self.fetch_response( uri, log = false )
       unless uri.is_a?( URI::HTTPS ) then raise "bad uri for data request"; end
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
-      # puts "\n\tFetching URI: #{uri.to_s}"
+      puts "\n\tFetching URI: #{uri.to_s}" if log
       http.get(uri.request_uri)
+      # TODO - implement some error handling here
     end
-
-    private
 
     def self.merge_keyparam( h )
       unless h.is_a?( Hash ) && api_key? then return nil; end
@@ -70,5 +75,17 @@ module RiotData
       uri.query = URI.encode_www_form(p)
       return uri
     end
+
+    def self.load_champs
+      uri = static_uri( CHAMP_DATA_URL )
+      res = fetch_response( uri )
+      champions = JSON.parse( res.body )
+      @@champ_data = Hash.new
+      champions['data'].each {|k, v| @@champ_data[v['id']] = v['name'] }
+      return @@champ_data
+    end
+    
+    private_class_method :merge_keyparam, :form_uri, :load_champs
+    
   end
 end

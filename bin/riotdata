@@ -9,7 +9,7 @@
 
 require 'riotdata/runner'
 
-riotkey = 'fbd73303-e9cf-478d-bbb9-a77bf03bc905'.freeze
+riotkey = ENV['RIOT_KEY']
 
 runner = RiotData::Runner.new riotkey
 runner.run
