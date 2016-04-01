@@ -29,5 +29,25 @@ class TestSummoner < Test::Unit::TestCase
     assert s2.level
     assert s2.revdate
   end
+
+  def test_ranked_champ_stats
+    s = setup_summoner
+    assert stats = s.ranked_champ_stats, "should return the hash of champ stats"
+    assert stats.is_a?( Array )  # it returns an array with one record per champ + a summary
+    assert os = s.ranked_champ_stats_output, "should create an output string for the stats"
+    assert os.is_a?( String )
+  end
+
+  def test_ranked_champ_stats_forced_update
+    skip "TODO - write this test"  # need to be mindful of access limits to server
+  end
+
+  private
+
+  def setup_summoner
+    assert s = SC.new( 31287954 )  # use GrandFromage
+    assert s.riot_id, "summoner request should have worked"
+    return s
+  end
 end
 
