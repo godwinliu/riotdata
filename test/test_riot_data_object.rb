@@ -9,6 +9,7 @@ require 'json'
 
 class TestRiotDataObject < Test::Unit::TestCase
 
+  # save some typing
   RDO = RiotData::RiotDataObject
   
   def setup
