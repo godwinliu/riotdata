@@ -3,9 +3,10 @@
 
 require 'riotdata/summoner'
 require 'net/http'
-require 'test/unit'
+#require 'test/unit'
+require 'minitest/autorun'
 
-class TestSummoner < Test::Unit::TestCase
+class TestSummoner < Minitest::Test
 
   # save some typing
   SC = RiotData::Summoner  # the class being tested

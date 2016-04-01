@@ -4,10 +4,11 @@
 
 require 'riotdata/riot_data_object'
 require 'net/http'
-require 'test/unit'
+#require 'test/unit'
+require 'minitest/autorun'
 require 'json'
 
-class TestRiotDataObject < Test::Unit::TestCase
+class TestRiotDataObject < Minitest::Test
 
   # save some typing
   RDO = RiotData::RiotDataObject
