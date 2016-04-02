@@ -27,7 +27,8 @@ module RiotData
 
         # [2016-Mar-31 GYL] much more data to be had here, but start simply:
         @rcs = rcr.map do |r|
-          { id: r['id'],
+          { champ_id: r['id'],
+            champ: Summoner.champs[r['id']],
             wins: r['stats']['totalSessionsWon'],
             losses: r['stats']['totalSessionsLost'],
             played: r['stats']['totalSessionsPlayed'] }
@@ -39,13 +40,13 @@ module RiotData
     # Does simple text processing to show the ranked champ stats
     def ranked_champ_stats_output( force_update = false )
       rcs = ranked_champ_stats( force_update )
-      summ = rcs.select {|v| v[:id]==0}
+      summ = rcs.select {|v| v[:champ_id]==0}
       out = "\nRanked results for #{name} (at #{revdate.strftime('%Y%b%d,%l:%M%P')}) with #{rcs.size-1} champions, #{winloss(summ[0])}:\n"
 
       rcs.sort! {|a, b| b[:wins] <=> a[:wins] }
       rcs.each do |c|
-        next if c[:id] == 0
-        out << "\t\t #{'%-12.12s' % Summoner.champs[c[:id]]}:\t#{winloss(c)})\n"
+        next if c[:champ_id] == 0
+        out << "\t\t #{'%-12.12s' % [c[:champ]]}:\t#{winloss(c)})\n"
       end
       return out
     end
