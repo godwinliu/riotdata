@@ -7,10 +7,21 @@
 #
 #  Copyright (c) 2016 Godwin Liu, All Rights Reserved.
 
+# require 'optparse"  # overkill for our app at this point, just use ARGV
 require 'riotdata/runner'
 
+default_summ = "grandfromage".freeze
 riotkey = ENV['RIOT_KEY']
 
+# opts = OptionParser.new
+# args = opts.parse(ARGV)
+puts "Run with #{ARGV.size} options: #{ARGV.join(', ')}"
+
 runner = RiotData::Runner.new riotkey
-runner.run
+if ARGV.size == 1 && ARGV[0].is_a?( String )
+  search_summ = ARGV[0]
+  runner.run search_summ
+else
+  runner.run default_summ
+end
 

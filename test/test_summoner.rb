@@ -16,6 +16,18 @@ class TestSummoner < Minitest::Test
     SC.api_key = riotkey
   end
 
+  def test_search_for_summoner
+    assert s_id = SC.search_name( "superraygun" )
+    assert s_id.is_a?( Integer ), "should return the id for an existing summoner"
+    assert s = SC.new( s_id )
+    assert s.is_a?( SC )
+    assert_equal(s_id, s.summ_id)
+    assert_equal(s_id, s.riot_id)
+
+    unknown_summ = "asdlkfjawoijalkjerkajskfjalsdkjfalsdjflkaejflkasjelfkjasdkf"
+    refute s_id = SC.search_name( unknown_summ )  # assumes unknown_summ is invalid search
+  end
+  
   def test_init_summoner
     assert s = SC.new( 123, false )   # try it without loading anything
     assert s.is_a?( SC )

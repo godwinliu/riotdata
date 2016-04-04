@@ -15,11 +15,16 @@ module RiotData
       # put options parser here
     end
 
-    def run
-      s = Summoner.new( 31287954 )  # summoner: grandfromage
-      puts "\tSummoner: #{s.name} (id=#{s.riot_id})"
-      puts s.ranked_champ_stats_output
-      puts s.recent_games_output
+    def run( search_name )
+      id = Summoner.search_name( search_name )
+      unless id.nil?
+        s = Summoner.new( id )
+        puts "\tSummoner: #{s.name} (id=#{s.riot_id})"
+        puts s.ranked_champ_stats_output
+        puts s.recent_games_output
+      else
+        puts "Summoner '#{search_name}' not found."
+      end
     end
 
   end

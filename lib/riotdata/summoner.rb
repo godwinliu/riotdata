@@ -8,10 +8,27 @@ require 'json'
 module RiotData
   class Summoner < RiotDataObject
     SUMMONER_PATH = '/v1.4/summoner/'.freeze
+    SUMMONER_SEARCHNAME_PATH = SUMMONER_PATH + 'by-name/'.freeze
     SUMMONER_STATS_PATH = '/v1.3/stats/by-summoner/'.freeze
     RECENT_GAMES_PATH = '/v1.3/game/by-summoner/'.freeze
     
     attr_reader :summ_id, :riot_id, :name, :ppic, :level, :revdate
+
+    # class methods
+
+    def self.search_name( name )
+      raise "search_name needs string for search" unless name.is_a?( String )
+      uri = Summoner.api_uri( SUMMONER_SEARCHNAME_PATH + name )
+      r = Summoner.fetch_response( uri, true )
+      ro = JSON.parse( r.body )
+      if ro['status'] && ro['status']['status_code'] == 404
+        return nil
+      else
+        return ro[name]['id']
+      end
+    end
+
+    # instance methods
     
     def initialize( summ_id = 31287954, load_remote = true )
       @summ_id = summ_id
