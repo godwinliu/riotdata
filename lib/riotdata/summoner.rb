@@ -9,6 +9,8 @@ module RiotData
   class Summoner < RiotDataObject
     SUMMONER_PATH = '/v1.4/summoner/'.freeze
     SUMMONER_STATS_PATH = '/v1.3/stats/by-summoner/'.freeze
+    RECENT_GAMES_PATH = '/v1.3/game/by-summoner/'.freeze
+    
     attr_reader :summ_id, :riot_id, :name, :ppic, :level, :revdate
     
     def initialize( summ_id = 31287954, load_remote = true )
@@ -18,7 +20,7 @@ module RiotData
 
     # return array with hash per champ in the current ranked season
     def ranked_champ_stats( force_update = false )
-      unless force_update || @rcs
+      if force_update || @rcs.nil?
         uri = Summoner.api_uri( SUMMONER_STATS_PATH + @summ_id.to_s + '/ranked' )
         r = Summoner.fetch_response( uri, true )
         ro = JSON.parse(r.body)
@@ -51,6 +53,47 @@ module RiotData
       return out
     end
 
+    # return array with hash per game for recent games
+    def recent_games( force_update = false )
+      if force_update || @rg.nil?
+        uri = Summoner.api_uri( RECENT_GAMES_PATH + @summ_id.to_s + '/recent' )
+        r = Summoner.fetch_response( uri, true )
+        ro = JSON.parse(r.body)
+        @rg = ro['games'].map do |g|
+          { gametype: g['subType'],
+            gamelength: g['stats']['timePlayed'],
+            champ: Summoner.champs[g['championId']],
+            win: g['stats']['win'],
+            kills: g['stats']['championsKilled'],
+            deaths: g['stats']['numDeaths'],
+            assists: g['stats']['assists'],
+            kda: kda( g['stats']['championsKilled'], g['stats']['numDeaths'], g['stats']['assists']),
+            gold: g['stats']['goldEarned'],
+            cs: g['stats']['minionsKilled'].to_i + g['stats']['neutralMinionsKilled'].to_i,
+            champ_dmg: g['stats']['totalDamageDealtToChampions'] }
+        end
+      end
+      return @rg
+    end
+
+    # Simple text output for recent games
+    def recent_games_output( force_update = false )
+      recent_games( force_update )
+      out = "\nRecent #{@rg.size} games for #{name}:\n"
+      @rg.each do |g|
+        out << "\t\t#{'%-16.16s' % g[:gametype]}\t#{g[:win] ? 'WIN':'LOSS'}"
+        out << "\tas #{'%-12.12s' % g[:champ]}:"
+        out << "\t#{g[:kills].to_i}/#{g[:deaths].to_i}/#{g[:assists].to_i}(#{g[:kda] == :perfect ? 'Perfect' : g[:kda]}),\t"
+        glen = g[:gamelength].divmod(60)
+        out << glen[0].to_s + "m" + glen[1].to_s + "s"
+        gpm = g[:gold].to_f / (g[:gamelength] / 60)
+        cspm = g[:cs].to_f / (g[:gamelength] / 60)
+        out << "\tGold:#{g[:gold]}(#{gpm.round(1)}),\tCS:#{g[:cs]}(#{cspm.round(1)}), "
+        out << "Dmg:#{g[:champ_dmg]}\n"
+      end
+      return out
+    end
+    
     private
 
     # load the base summoner data
@@ -84,5 +127,16 @@ module RiotData
       return "#{win}/#{loss}\t(n=#{n},\t#{(win.to_f*100/n).round(1)}%)"
     end
 
+    # calculate kda
+    def kda( kills, deaths, assists)
+      if deaths.nil? || deaths.zero? # avoid 0div
+        kda = :perfect
+      else
+        kills || kills = 0
+        assists || assists = 0
+        kda = (kills.to_f + assists) / deaths
+        kda.round(2)
+      end
+    end
   end
 end

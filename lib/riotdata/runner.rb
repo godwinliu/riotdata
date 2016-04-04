@@ -19,6 +19,7 @@ module RiotData
       s = Summoner.new( 31287954 )  # summoner: grandfromage
       puts "\tSummoner: #{s.name} (id=#{s.riot_id})"
       puts s.ranked_champ_stats_output
+      puts s.recent_games_output
     end
 
   end

@@ -33,7 +33,7 @@ class TestSummoner < Minitest::Test
 
   def test_ranked_champ_stats
     s = setup_summoner
-    assert stats = s.ranked_champ_stats, "should return the hash of champ stats"
+    assert stats = s.ranked_champ_stats, "should return the champ stats"
     assert stats.is_a?( Array )  # it returns an array with one record per champ + a summary
     assert os = s.ranked_champ_stats_output, "should create an output string for the stats"
     assert os.is_a?( String )
@@ -43,6 +43,18 @@ class TestSummoner < Minitest::Test
     skip "TODO - write this test"  # need to be mindful of access limits to server
   end
 
+  def test_recent_games
+    s = setup_summoner
+    assert rg = s.recent_games, "should return array of recent games"
+    assert rg.is_a?( Array )
+    assert os = s.recent_games_output, "should create an output string for the recent games"
+    assert os.is_a?( String )
+  end
+
+  def test_recent_games_forced_update
+    skip "TODO - write test/consider access limits"
+  end
+  
   private
 
   def setup_summoner
