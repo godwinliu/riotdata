@@ -12,6 +12,7 @@ class TestRiotDataObject < Minitest::Test
 
   # save some typing
   RDO = RiotData::RiotDataObject
+  TESTED_VER = '6.6.1'
   
   def setup
   end
@@ -28,12 +29,26 @@ class TestRiotDataObject < Minitest::Test
     assert RiotData::RiotDataObject.api_key?, "should return true for existing key"
   end
 
+  def test_should_cache_version
+    assert set_api_key(get_valid_key)
+    assert v1 = RiotData::RiotDataObject.current_version, "should return the current version of the game"
+    assert_equal( TESTED_VER, v1 )
+  end
+  
   def test_should_cache_champion_static_data
     assert set_api_key(get_valid_key)
     assert set1 = RiotData::RiotDataObject.champs
     assert set2 = RiotData::RiotDataObject.champs # this is a duplicate assertion, to see if it triggers another fetch request to the server - log should show only one.
     assert_equal(set1, set2)
     # puts set1.inspect
+  end
+
+  def test_should_cache_champion_icon_url
+    assert set_api_key(get_valid_key)
+    champ_id = 150 # Gnar
+    assert i_url = RiotData::RiotDataObject.champ_image_icon_url( champ_id )
+    expected = "http://ddragon.leagueoflegends.com/cdn/" + TESTED_VER + "/img/champion/Gnar.png"
+    assert_equal( expected, i_url )
   end
   
   def test_should_raise_exception_if_no_api_key_for_uri
