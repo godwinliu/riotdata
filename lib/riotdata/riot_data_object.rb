@@ -14,19 +14,27 @@
 
 require 'net/http'
 require 'date'
+require 'json'
 
 module RiotData
-  REGION = '/na'.freeze
   SERVER_URL = 'https://na.api.pvp.net'.freeze
+  IMAGE_SERVER_URL = 'http://ddragon.leagueoflegends.com/cdn'.freeze
+  
+  REGION = '/na'.freeze
   API_PATH = '/api/lol'.freeze
   STATIC_DATA_PATH = '/api/lol/static-data'.freeze
-  CHAMP_DATA_URL = '/v1.2/champion'.freeze
-  
+  CHAMP_DATA_PATH = '/v1.2/champion'.freeze
+  VERSION_PATH = '/v1.2/versions'.freeze
+
+  CHAMP_IMAGE_PATH = '/img/champion'.freeze
+
   class RiotDataObject
 
     # class variables
     @@api_key = nil    # the application will only use a single key, for all data objects
     @@champ_data = nil # cache the static data relating to champions for use by all subclasses
+    @@current_version = nil
+    @@versions = nil
     
     # class methods
     def self.api_key=( key )
@@ -42,10 +50,19 @@ module RiotData
     #  @@api_key
     # end
 
-    def self.champs  # accessor for all static champ data
+    def self.current_version # accessor for current version data
+      @@current_version ||= load_versions 
+    end
+    
+    def self.champs  # accessor for champ names
       @@champ_data || load_champs
     end
       
+    def self.champ_image_icon_url( champ_id )
+      raise "invalid champ_id" unless self.champs.include?( champ_id )
+      return IMAGE_SERVER_URL + '/' + self.current_version + CHAMP_IMAGE_PATH + '/' + self.champs[champ_id] + ".png"
+    end
+    
     def self.static_uri( path, params = {} )
       url = SERVER_URL + STATIC_DATA_PATH + REGION + path
       return form_uri( url, params )
@@ -86,15 +103,24 @@ module RiotData
     end
 
     def self.load_champs
-      uri = static_uri( CHAMP_DATA_URL )
+      uri = static_uri( CHAMP_DATA_PATH )
       res = fetch_response( uri )
       champions = JSON.parse( res.body )
       @@champ_data = Hash.new
-      champions['data'].each {|k, v| @@champ_data[v['id']] = v['name'] }
+      champions['data'].each do |k, v|
+        @@champ_data[v['id']] = v['name']
+      end
       return @@champ_data
     end
 
-    private_class_method :merge_keyparam, :form_uri, :load_champs
+    def self.load_versions
+      uri = static_uri( VERSION_PATH )
+      res = fetch_response(uri)
+      @@versions = JSON.parse(res.body)
+      return @@versions.first
+    end
+    
+    private_class_method :merge_keyparam, :form_uri, :load_champs, :load_versions
     
   end
 end
