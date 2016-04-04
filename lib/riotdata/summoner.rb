@@ -41,17 +41,20 @@ module RiotData
         uri = Summoner.api_uri( SUMMONER_STATS_PATH + @summ_id.to_s + '/ranked' )
         r = Summoner.fetch_response( uri, true )
         ro = JSON.parse(r.body)
-        # puts ro['champions']
         rcr = ro['champions']
 
-        # [2016-Mar-31 GYL] much more data to be had here, but start simply:
-        @rcs = rcr.map do |r|
-          { champ_id: r['id'],
-            champ: Summoner.champs[r['id']],
-            wins: r['stats']['totalSessionsWon'],
-            losses: r['stats']['totalSessionsLost'],
-            played: r['stats']['totalSessionsPlayed'] }
-        end
+        unless rcr
+          @rcs = []  # handle case: no ranked data
+        else
+          # [2016-Mar-31 GYL] much more data to be had here, but start simply:
+          @rcs = rcr.map do |r|
+            { champ_id: r['id'],
+              champ: Summoner.champs[r['id']],
+              wins: r['stats']['totalSessionsWon'],
+              losses: r['stats']['totalSessionsLost'],
+              played: r['stats']['totalSessionsPlayed'] }
+          end
+        end # no data
       end
       return @rcs
     end
@@ -76,20 +79,24 @@ module RiotData
         uri = Summoner.api_uri( RECENT_GAMES_PATH + @summ_id.to_s + '/recent' )
         r = Summoner.fetch_response( uri, true )
         ro = JSON.parse(r.body)
-        @rg = ro['games'].map do |g|
-          { gametype: g['subType'],
-            gamelength: g['stats']['timePlayed'],
-            champ: Summoner.champs[g['championId']],
-            win: g['stats']['win'],
-            kills: g['stats']['championsKilled'],
-            deaths: g['stats']['numDeaths'],
-            assists: g['stats']['assists'],
-            kda: kda( g['stats']['championsKilled'], g['stats']['numDeaths'], g['stats']['assists']),
-            gold: g['stats']['goldEarned'],
-            cs: g['stats']['minionsKilled'].to_i + g['stats']['neutralMinionsKilled'].to_i,
-            champ_dmg: g['stats']['totalDamageDealtToChampions'] }
-        end
-      end
+        unless ro['games']
+          @rg = []
+        else
+          @rg = ro['games'].map do |g|
+            { gametype: g['subType'],
+              gamelength: g['stats']['timePlayed'],
+              champ: Summoner.champs[g['championId']],
+              win: g['stats']['win'],
+              kills: g['stats']['championsKilled'],
+              deaths: g['stats']['numDeaths'],
+              assists: g['stats']['assists'],
+              kda: kda( g['stats']['championsKilled'], g['stats']['numDeaths'], g['stats']['assists']),
+              gold: g['stats']['goldEarned'],
+              cs: g['stats']['minionsKilled'].to_i + g['stats']['neutralMinionsKilled'].to_i,
+              champ_dmg: g['stats']['totalDamageDealtToChampions'] }
+          end
+        end # whether or not there's data
+      end # force update
       return @rg
     end
 

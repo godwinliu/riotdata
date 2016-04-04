@@ -51,6 +51,10 @@ class TestSummoner < Minitest::Test
     assert os.is_a?( String )
   end
 
+  def test_ranked_champ_stats_with_no_data
+    skip "TODO - write test for case where summoner has no ranked champ stats"
+  end
+  
   def test_ranked_champ_stats_forced_update
     skip "TODO - write this test"  # need to be mindful of access limits to server
   end
@@ -63,6 +67,10 @@ class TestSummoner < Minitest::Test
     assert os.is_a?( String )
   end
 
+  def test_recent_games_with_no_data
+    skip "TODO - write test for case where summoner has no recent games"
+  end
+  
   def test_recent_games_forced_update
     skip "TODO - write test/consider access limits"
   end
