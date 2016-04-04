@@ -85,6 +85,7 @@ module RiotData
           @rg = ro['games'].map do |g|
             { gametype: g['subType'],
               gamelength: g['stats']['timePlayed'],
+              champ_id: g['championId'],
               champ: Summoner.champs[g['championId']],
               win: g['stats']['win'],
               kills: g['stats']['championsKilled'],
