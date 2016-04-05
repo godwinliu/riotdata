@@ -12,7 +12,7 @@ class TestRiotDataObject < Minitest::Test
 
   # save some typing
   RDO = RiotData::RiotDataObject
-  TESTED_VER = '6.6.1'
+  TESTED_VER = '6.7.1'
   
   def setup
   end

@@ -6,12 +6,13 @@ require_relative 'riot_data_object'
 require 'json'
 
 module RiotData
-  class Summoner < RiotDataObject
-    SUMMONER_PATH = '/v1.4/summoner/'.freeze
-    SUMMONER_SEARCHNAME_PATH = SUMMONER_PATH + 'by-name/'.freeze
-    SUMMONER_STATS_PATH = '/v1.3/stats/by-summoner/'.freeze
-    RECENT_GAMES_PATH = '/v1.3/game/by-summoner/'.freeze
+  SUMMONER_PATH = '/v1.4/summoner/'.freeze
+  SUMMONER_ICON_PATH = '/img/profileicon/'.freeze  # on static server
+  SUMMONER_SEARCHNAME_PATH = SUMMONER_PATH + 'by-name/'.freeze
+  SUMMONER_STATS_PATH = '/v1.3/stats/by-summoner/'.freeze
+  RECENT_GAMES_PATH = '/v1.3/game/by-summoner/'.freeze
     
+  class Summoner < RiotDataObject
     attr_reader :summ_id, :riot_id, :name, :ppic, :level, :revdate
 
     # class methods
@@ -28,6 +29,10 @@ module RiotData
       end
     end
 
+    def self.icon_url
+      return STATIC_SERVER_URL + '/' + self.current_version + SUMMONER_ICON_PATH
+    end
+    
     # instance methods
     
     def initialize( summ_id = 31287954, load_remote = true )
@@ -35,6 +40,11 @@ module RiotData
       load_summoner( load_remote )
     end
 
+    # return a url to the profile icon
+    def icon_url
+      return Summoner.icon_url + self.ppic.to_s + ".png"
+    end
+    
     # return array with hash per champ in the current ranked season
     def ranked_champ_stats( force_update = false )
       if force_update || @rcs.nil?

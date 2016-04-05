@@ -8,6 +8,10 @@ require 'minitest/autorun'
 
 class TestSummoner < Minitest::Test
 
+  # expected test version
+  TEST_VER = '6.7.1'
+  STATIC_SERVER_URL = 'http://ddragon.leagueoflegends.com/cdn'
+    
   # save some typing
   SC = RiotData::Summoner  # the class being tested
 
@@ -16,6 +20,8 @@ class TestSummoner < Minitest::Test
     SC.api_key = riotkey
   end
 
+  # class tests
+  
   def test_search_for_summoner
     assert s_id = SC.search_name( "superraygun" )
     assert s_id.is_a?( Integer ), "should return the id for an existing summoner"
@@ -27,6 +33,13 @@ class TestSummoner < Minitest::Test
     unknown_summ = "asdlkfjawoijalkjerkajskfjalsdkjfalsdjflkaejflkasjelfkjasdkf"
     refute s_id = SC.search_name( unknown_summ )  # assumes unknown_summ is invalid search
   end
+
+  def test_summonerclass_icon_url
+    expect = STATIC_SERVER_URL + '/' + TEST_VER + '/img/profileicon/'
+    assert_equal(expect, SC.icon_url)
+  end
+  
+  # instance tests
   
   def test_init_summoner
     assert s = SC.new( 123, false )   # try it without loading anything
@@ -43,6 +56,13 @@ class TestSummoner < Minitest::Test
     assert s2.revdate
   end
 
+  def test_return_icon_url
+    s = setup_summoner
+    assert s.ppic, "icon pic should be available for this summoner"
+    expect = STATIC_SERVER_URL + '/' + TEST_VER + '/img/profileicon/' + s.ppic.to_s + ".png"
+    assert_equal(expect, s.icon_url)
+  end
+  
   def test_ranked_champ_stats
     s = setup_summoner
     assert stats = s.ranked_champ_stats, "should return the champ stats"

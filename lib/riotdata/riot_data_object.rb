@@ -18,7 +18,7 @@ require 'json'
 
 module RiotData
   SERVER_URL = 'https://na.api.pvp.net'.freeze
-  IMAGE_SERVER_URL = 'http://ddragon.leagueoflegends.com/cdn'.freeze
+  STATIC_SERVER_URL = 'http://ddragon.leagueoflegends.com/cdn'.freeze
   
   REGION = '/na'.freeze
   API_PATH = '/api/lol'.freeze
@@ -60,7 +60,7 @@ module RiotData
       
     def self.champ_image_icon_url( champ_id )
       raise "invalid champ_id" unless self.champs.include?( champ_id )
-      return IMAGE_SERVER_URL + '/' + self.current_version + CHAMP_IMAGE_PATH + '/' + self.champs[champ_id] + ".png"
+      return STATIC_SERVER_URL + '/' + self.current_version + CHAMP_IMAGE_PATH + '/' + self.champs[champ_id] + ".png"
     end
     
     def self.static_uri( path, params = {} )
