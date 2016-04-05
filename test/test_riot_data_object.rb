@@ -45,9 +45,9 @@ class TestRiotDataObject < Minitest::Test
 
   def test_should_cache_champion_icon_url
     assert set_api_key(get_valid_key)
-    champ_id = 150 # Gnar
+    champ_id = 96 # Kog'Maw
     assert i_url = RiotData::RiotDataObject.champ_image_icon_url( champ_id )
-    expected = "http://ddragon.leagueoflegends.com/cdn/" + TESTED_VER + "/img/champion/Gnar.png"
+    expected = "http://ddragon.leagueoflegends.com/cdn/" + TESTED_VER + "/img/champion/KogMaw.png"
     assert_equal( expected, i_url )
   end
   

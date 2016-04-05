@@ -60,7 +60,7 @@ module RiotData
       
     def self.champ_image_icon_url( champ_id )
       raise "invalid champ_id" unless self.champs.include?( champ_id )
-      return STATIC_SERVER_URL + '/' + self.current_version + CHAMP_IMAGE_PATH + '/' + self.champs[champ_id] + ".png"
+      return STATIC_SERVER_URL + '/' + self.current_version + CHAMP_IMAGE_PATH + '/' + self.champs[champ_id][:image]
     end
     
     def self.static_uri( path, params = {} )
@@ -103,12 +103,12 @@ module RiotData
     end
 
     def self.load_champs
-      uri = static_uri( CHAMP_DATA_PATH )
+      uri = static_uri( CHAMP_DATA_PATH, { champData: 'image'} )
       res = fetch_response( uri )
       champions = JSON.parse( res.body )
       @@champ_data = Hash.new
       champions['data'].each do |k, v|
-        @@champ_data[v['id']] = v['name']
+        @@champ_data[v['id']] = {name: v['name'], image: v['image']['full']}
       end
       return @@champ_data
     end

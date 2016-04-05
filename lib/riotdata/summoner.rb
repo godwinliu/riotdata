@@ -59,7 +59,7 @@ module RiotData
           # [2016-Mar-31 GYL] much more data to be had here, but start simply:
           @rcs = rcr.map do |r|
             { champ_id: r['id'],
-              champ: Summoner.champs[r['id']],
+              champ: (Summoner.champs[r['id']] ? Summoner.champs[r['id']][:name] : ''),
               wins: r['stats']['totalSessionsWon'],
               losses: r['stats']['totalSessionsLost'],
               played: r['stats']['totalSessionsPlayed'] }
@@ -96,7 +96,7 @@ module RiotData
             { gametype: g['subType'],
               gamelength: g['stats']['timePlayed'],
               champ_id: g['championId'],
-              champ: Summoner.champs[g['championId']],
+              champ: Summoner.champs[g['championId']][:name],
               win: g['stats']['win'],
               kills: g['stats']['championsKilled'],
               deaths: g['stats']['numDeaths'],
