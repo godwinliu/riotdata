@@ -7,12 +7,13 @@ require 'net/http'
 #require 'test/unit'
 require 'minitest/autorun'
 require 'json'
+require_relative 'riotdata_test_helper'
 
 class TestRiotDataObject < Minitest::Test
-
+  include RiotDataTest
+  
   # save some typing
   RDO = RiotData::RiotDataObject
-  TESTED_VER = '6.7.1'
   
   def setup
   end
@@ -114,19 +115,19 @@ class TestRiotDataObject < Minitest::Test
   
   private
 
-  def get_valid_key
-    key = ENV['RIOT_KEY']
-    flunk "Need to set RIOT_KEY env variable (with valid api_key from pvp.net)" unless key
-    return key
-  end
+#  def get_valid_key
+#    key = ENV['RIOT_KEY']
+#    flunk "Need to set RIOT_KEY env variable (with valid api_key from pvp.net)" unless key
+#    return key
+#  end
 
   def get_valid_path
     path = "/v1.4/summoner/by-name/grandfromage"
   end
   
-  def get_fake_key
-    "123"
-  end
+#  def get_fake_key
+#    "123"
+#  end
 
   def get_fake_path
     "/somepath"
