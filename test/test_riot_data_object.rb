@@ -103,8 +103,13 @@ class TestRiotDataObject < Minitest::Test
     rtime = 1459520093000
     assert d = RDO.convert_riot_time( rtime )
     assert d.is_a?( DateTime )
-    assert_equal( "2016-Apr-01", d.strftime('%Y-%b-%d') )
-    # TODO - also fix the hour/min issue - there's some time zone handling to do
+    assert_equal( "2016-Apr-01 10:14am", d.strftime('%Y-%b-%d %l:%M%P') )
+  end
+
+  def test_should_return_timezone
+    assert tz = RDO.time_zone, "should return the default time zone"
+    expect_default = 'America - Toronto'
+    assert_equal( expect_default, tz.to_s )
   end
   
   private

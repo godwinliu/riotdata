@@ -14,6 +14,7 @@
 
 require 'net/http'
 require 'date'
+require 'tzinfo'
 require 'json'
 
 module RiotData
@@ -27,7 +28,8 @@ module RiotData
   VERSION_PATH = '/v1.2/versions'.freeze
 
   CHAMP_IMAGE_PATH = '/img/champion'.freeze
-
+  DEFAULT_TZ = 'America/Toronto'
+  
   class RiotDataObject
 
     # class variables
@@ -35,6 +37,7 @@ module RiotData
     @@champ_data = nil # cache the static data relating to champions for use by all subclasses
     @@current_version = nil
     @@versions = nil
+    @@timezone = TZInfo::Timezone.get( DEFAULT_TZ )
     
     # class methods
     def self.api_key=( key )
@@ -82,10 +85,14 @@ module RiotData
       # TODO - implement some error handling here
     end
 
+    def self.time_zone
+      @@timezone
+    end
+    
     def self.convert_riot_time( fnum )
       raise "riot time needed as fixnum for conversion" unless fnum.is_a?( Fixnum )
-      DateTime.strptime( fnum.to_s[0...-3], '%s')  # riot stores in milliseconds from epoch
-      # TODO - there's a time zone bug or something.. we're close but not accurate to hour.
+      riottime = DateTime.strptime( fnum.to_s[0...-3], '%s')  # riot stores in milliseconds from epoch
+      localtime = @@timezone.utc_to_local(riottime)
     end
     
     # private class methods:

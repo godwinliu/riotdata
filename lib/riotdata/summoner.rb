@@ -95,8 +95,10 @@ module RiotData
           @rg = ro['games'].map do |g|
             { gametype: g['subType'],
               gamelength: g['stats']['timePlayed'],
+              gamedate: g['createDate'],
               champ_id: g['championId'],
               champ: Summoner.champs[g['championId']][:name],
+              role: g['stats']['playerRole'],
               win: g['stats']['win'],
               kills: g['stats']['championsKilled'],
               deaths: g['stats']['numDeaths'],
@@ -116,7 +118,9 @@ module RiotData
       recent_games( force_update )
       out = "\nRecent #{@rg.size} games for #{name}:\n"
       @rg.each do |g|
-        out << "\t\t#{'%-16.16s' % g[:gametype]}\t#{g[:win] ? 'WIN':'LOSS'}"
+        out << "\t\t#{'%-16.16s' % g[:gametype]} "
+        out << "(#{Summoner.convert_riot_time(g[:gamedate]).strftime('%Y %b %e %l:%M%P')})"
+        out << "\t#{g[:win] ? 'WIN':'LOSS'}"
         out << "\tas #{'%-12.12s' % g[:champ]}:"
         out << "\t#{g[:kills].to_i}/#{g[:deaths].to_i}/#{g[:assists].to_i}(#{g[:kda] == :perfect ? 'Perfect' : g[:kda]}),\t"
         glen = g[:gamelength].divmod(60)
