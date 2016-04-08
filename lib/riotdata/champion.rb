@@ -15,12 +15,12 @@ module RiotData
     include RiotDataConnector
     
     def list
-      @champ_list || load_champs
+      @champ_list || load_champs_list
     end
 
     private
     
-    def load_champs
+    def load_champs_list
       uri = static_uri( CHAMP_DATA_PATH, { champData: 'image'} )
       res = fetch_response( uri, true )
       champions = JSON.parse( res.body )

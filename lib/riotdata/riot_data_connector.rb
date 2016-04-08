@@ -2,6 +2,10 @@
 #  Copyright (c) 2016 Godwin Liu, All Rights Reserved.
 #
 #  mixin module for defining paths to riot server url's and paths
+#
+#  [2016-Apr-08 GYL] Note - in development - this repeats a lot of
+#  code from RiotDataObject.  Those functions should eventually be
+#  replaced by the ones here, in order to keep the library "DRY".
 
 require 'net/http'
 
