@@ -4,11 +4,33 @@
 #  Library singleton class for accessing static data
 #  relating to champions.
 
-require 'net/http'
 require 'json'
+require 'singleton'
+
+require_relative 'riot_data_connector'
 
 module RiotData
   class Champion
-  end
+    include Singleton
+    include RiotDataConnector
+    
+    def list
+      @champ_list || load_champs
+    end
+
+    private
+    
+    def load_champs
+      uri = static_uri( CHAMP_DATA_PATH, { champData: 'image'} )
+      res = fetch_response( uri, true )
+      champions = JSON.parse( res.body )
+      @champ_list = Hash.new
+      champions['data'].each do |k, v|
+        @champ_list[v['id']] = {name: v['name'], image: v['image']['full']}
+      end
+      return @champ_list
+    end
+
+  end  # class Champion
 end
 
