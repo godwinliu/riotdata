@@ -42,10 +42,11 @@ module RiotData
     # class methods
     def self.api_key=( key )
       @@api_key = key
+      $api_key = key   # this to enable RiotDataConnector
     end
 
     def self.api_key?
-      @@api_key ? true : false
+      @@api_key && $api_key ? true : false
     end
 
     # for debugging:

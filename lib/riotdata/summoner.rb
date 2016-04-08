@@ -3,6 +3,7 @@
 #  Copyright (c) 2016 Godwin Liu, All Rights Reserved.
 
 require_relative 'riot_data_object'
+require_relative 'riot_data_connector'
 require 'json'
 
 module RiotData
@@ -13,14 +14,15 @@ module RiotData
   RECENT_GAMES_PATH = '/v1.3/game/by-summoner/'.freeze
     
   class Summoner < RiotDataObject
+    include RiotDataConnector
     attr_reader :summ_id, :riot_id, :name, :ppic, :level, :revdate
 
     # class methods
 
     def self.search_name( name )
       raise "search_name needs string for search" unless name.is_a?( String )
-      uri = Summoner.api_uri( SUMMONER_SEARCHNAME_PATH + name )
-      r = Summoner.fetch_response( uri, true )
+      uri = api_uri( SUMMONER_SEARCHNAME_PATH + name )
+      r = fetch_response( uri, true )
       ro = JSON.parse( r.body )
       if ro['status'] && ro['status']['status_code'] == 404
         return nil
@@ -48,8 +50,8 @@ module RiotData
     # return array with hash per champ in the current ranked season
     def ranked_champ_stats( force_update = false )
       if force_update || @rcs.nil?
-        uri = Summoner.api_uri( SUMMONER_STATS_PATH + @summ_id.to_s + '/ranked' )
-        r = Summoner.fetch_response( uri, true )
+        uri = api_uri( SUMMONER_STATS_PATH + @summ_id.to_s + '/ranked' )
+        r = fetch_response( uri, true )
         ro = JSON.parse(r.body)
         rcr = ro['champions']
 
@@ -86,8 +88,8 @@ module RiotData
     # return array with hash per game for recent games
     def recent_games( force_update = false )
       if force_update || @rg.nil?
-        uri = Summoner.api_uri( RECENT_GAMES_PATH + @summ_id.to_s + '/recent' )
-        r = Summoner.fetch_response( uri, true )
+        uri = api_uri( RECENT_GAMES_PATH + @summ_id.to_s + '/recent' )
+        r = fetch_response( uri, true )
         ro = JSON.parse(r.body)
         unless ro['games']
           @rg = []
@@ -140,8 +142,8 @@ module RiotData
     #    TODO - handle forbidden/denied response
     def load_summoner( use_remote )
       return unless use_remote
-      uri = Summoner.api_uri( SUMMONER_PATH + @summ_id.to_s )
-      r = Summoner.fetch_response( uri, true )
+      uri = api_uri( SUMMONER_PATH + @summ_id.to_s )
+      r = fetch_response( uri, true )
       ro = JSON.parse(r.body)
       raise "malformed summoner data response" unless ro.size == 1
       parse_summoner(ro.values.first)

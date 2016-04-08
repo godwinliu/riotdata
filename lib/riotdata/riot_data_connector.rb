@@ -36,6 +36,11 @@ module RiotDataConnector
     return form_uri( url, params )
   end
 
+  def api_uri( path, params = {} )
+    url = SERVER_URL + API_PATH + REGION + path
+    return form_uri( url, params )
+  end
+  
   def form_uri( url, params )
     uri = URI( url )
     unless p = merge_keyparam(params) then raise "bad data request param hash, or no api_key"; end
