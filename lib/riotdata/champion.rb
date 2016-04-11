@@ -4,15 +4,16 @@
 #  Library singleton class for accessing static data
 #  relating to champions.
 
+require_relative 'riot_data_object'
 require 'json'
 require 'singleton'
 
-require_relative 'riot_data_connector'
+# require_relative 'riot_data_connector'
 
 module RiotData
-  class Champion
+  class Champion < RiotDataObject
     include Singleton
-    include RiotDataConnector
+    # include RiotDataConnector
     
     def list
       @champ_list || load_champs_list

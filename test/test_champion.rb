@@ -19,15 +19,15 @@ class TestChampion < Minitest::Test
   def test_should_be_able_to_set_api_key
     key = get_fake_key
     c = RC.instance
-    assert set_api_key( c, key )
+    assert set_api_key( key )
   end
 
   def test_should_be_able_to_test_api_keyexist
     c = RC.instance
-    refute set_api_key(c, nil), "should delete key"
-    refute c.api_key?, "should return false for no key"
-    assert set_api_key(c, get_fake_key)
-    assert c.api_key?, "should return true for existing key"
+    refute set_api_key( nil), "should delete key"
+    refute RC.api_key?, "should return false for no key"
+    assert set_api_key( get_fake_key)
+    assert RC.api_key?, "should return true for existing key"
   end
 
   def test_get_champion_list
@@ -46,14 +46,13 @@ class TestChampion < Minitest::Test
   
   private
   
-  def set_api_key( c, key )
-    raise "requires singleton instance" unless c.is_a?(RC)
-    c.api_key = key
+  def set_api_key( key )
+    RC.api_key = key
   end
 
   def setup_active_test
+    RC.api_key = get_valid_key
     c = RC.instance
-    c.api_key = get_valid_key
     return c
   end
 end

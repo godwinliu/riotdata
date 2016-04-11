@@ -63,15 +63,33 @@ class TestRiotDataObject < Minitest::Test
     path = get_fake_path
     expected = URI("https://na.api.pvp.net/api/lol/static-data/na" << path << "?api_key=" << key)
     assert set_api_key(key)
-    assert_equal( expected, RiotData::RiotDataObject.static_uri( path ) )
+    assert_equal( expected, RDO.static_uri( path ) )
   end
 
+  def test_instances_should_be_able_to_form_static_uri
+    key = get_fake_key
+    path = get_fake_path
+    expected = URI("https://na.api.pvp.net/api/lol/static-data/na" << path << "?api_key=" << key)
+    o = RDO.new
+    assert set_api_key(key)
+    assert_equal( expected, o.static_uri(path) )
+  end
+  
   def test_should_form_data_api_uri
     key = get_fake_key
     path = get_fake_path
     expected = URI("https://na.api.pvp.net/api/lol/na" << path << "?api_key=" << key)
     assert set_api_key(key)
-    assert_equal( expected, RiotData::RiotDataObject.api_uri( path ) )
+    assert_equal( expected, RDO.api_uri( path ) )
+  end
+
+  def test_instances_should_be_able_to_form_api_uri
+    key = get_fake_key
+    path = get_fake_path
+    expected = URI("https://na.api.pvp.net/api/lol/na" << path << "?api_key=" << key)
+    o = RDO.new
+    assert set_api_key(key)
+    assert_equal( expected, o.api_uri( path ) )
   end
 
   def test_should_raise_exception_for_non_URI_fetch
@@ -100,6 +118,18 @@ class TestRiotDataObject < Minitest::Test
     assert JSON.parse( res.body ).is_a?( Hash ), "successful response should be parsable into a ruby hash"
   end
 
+  def test_instances_should_be_able_to_fetch_api_responses
+    key = get_valid_key
+    path = get_valid_path
+    assert set_api_key(key)
+    o = RDO.new
+    assert uri = o.api_uri( path )
+    assert res = o.fetch_response( uri )
+    assert_equal(Net::HTTPOK, res.class)
+    assert_equal('200', res.code)
+    assert JSON.parse( res.body ).is_a?( Hash ), "successful response should be parsable into a ruby hash"
+  end
+
   def test_should_convert_riot_time
     rtime = 1459520093000
     assert d = RDO.convert_riot_time( rtime )
@@ -115,20 +145,10 @@ class TestRiotDataObject < Minitest::Test
   
   private
 
-#  def get_valid_key
-#    key = ENV['RIOT_KEY']
-#    flunk "Need to set RIOT_KEY env variable (with valid api_key from pvp.net)" unless key
-#    return key
-#  end
-
   def get_valid_path
     path = "/v1.4/summoner/by-name/grandfromage"
   end
   
-#  def get_fake_key
-#    "123"
-#  end
-
   def get_fake_path
     "/somepath"
   end

@@ -3,7 +3,6 @@
 #  Copyright (c) 2016 Godwin Liu, All Rights Reserved.
 
 require_relative 'riot_data_object'
-require_relative 'riot_data_connector'
 require 'json'
 
 module RiotData
@@ -14,7 +13,6 @@ module RiotData
   RECENT_GAMES_PATH = '/v1.3/game/by-summoner/'.freeze
     
   class Summoner < RiotDataObject
-    include RiotDataConnector
     attr_reader :summ_id, :riot_id, :name, :ppic, :level, :revdate
 
     # class methods

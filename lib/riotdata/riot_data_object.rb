@@ -49,11 +49,6 @@ module RiotData
       @@api_key && $api_key ? true : false
     end
 
-    # for debugging:
-    # def self.api_key
-    #  @@api_key
-    # end
-
     def self.current_version # accessor for current version data
       @@current_version ||= load_versions 
     end
@@ -72,11 +67,19 @@ module RiotData
       return form_uri( url, params )
     end
 
+    def static_uri( path, params = {} )
+      RiotDataObject.static_uri( path, params )
+    end
+    
     def self.api_uri( path, params = {} )
       url = SERVER_URL + API_PATH + REGION + path
       return form_uri( url, params )
     end
 
+    def api_uri( path, params = {} )
+      RiotDataObject.api_uri( path, params )
+    end
+    
     def self.fetch_response( uri, log = false )
       unless uri.is_a?( URI::HTTPS ) then raise "bad uri for data request"; end
       http = Net::HTTP.new(uri.host, uri.port)
@@ -86,6 +89,10 @@ module RiotData
       # TODO - implement some error handling here
     end
 
+    def fetch_response( uri, log = false)
+      RiotDataObject.fetch_response( uri, log )
+    end
+    
     def self.time_zone
       @@timezone
     end

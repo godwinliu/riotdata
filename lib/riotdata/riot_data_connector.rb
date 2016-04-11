@@ -5,7 +5,10 @@
 #
 #  [2016-Apr-08 GYL] Note - in development - this repeats a lot of
 #  code from RiotDataObject.  Those functions should eventually be
-#  replaced by the ones here, in order to keep the library "DRY".
+#  replaced by the ones here, in order to keep the library "DRY", if
+#  the singleton code is better... but that's not really clear at the
+#  moment..  it seems that inheriting a base object also has its
+#  advantages...
 
 require 'net/http'
 require 'tzinfo'
