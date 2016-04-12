@@ -94,10 +94,11 @@ module RiotData
                   skey[:name] = sv
                 when 'sanitizedDescription'
                   skey[:desc_short] = sv
-                when 'sanitizedTooltip'  # tooltip also available with color suggestion
-                  skey[:desc] = sv
+                # when 'sanitizedTooltip'  # tooltip also available with color suggestion
+                #  skey[:desc] = sv
                 end
               end
+              skey[:desc] = process_spell( s )
               # for debugging:
               skey[:raw] = s
             end
@@ -132,6 +133,18 @@ module RiotData
       return @champ_list
     end
 
+    def process_spell( spell_hash )
+      # p spell_hash
+      raise "invalid spell data" unless spell_hash.is_a?( Hash)
+      # spell_hash['sanitizedTooltip']
+      effect_sub( spell_hash['sanitizedTooltip'], spell_hash['effectBurn'] )
+    end
+    
+    def effect_sub( desc, effect_burn )
+      raise 'invalid effect data' unless effect_burn.is_a?( Array )
+      # puts "Effectburn: #{effect_burn}"
+      desc.gsub(/\{\{\se(\d)\s\}\}/) { effect_burn[$1.to_i] }
+    end
   end  # class Champion
 end
 
