@@ -102,6 +102,15 @@ module RiotData
       riottime = DateTime.strptime( fnum.to_s[0...-3], '%s')  # riot stores in milliseconds from epoch
       localtime = @@timezone.utc_to_local(riottime)
     end
+
+    def word_wrap( text, options = {} )
+      line_width = options.fetch(:line_width, 80)
+      separator = options.fetch(:separator, "\n")
+      
+      text.split("\n").collect! do |line|
+        line.length > line_width ? line.gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1" + separator).strip : line
+      end * ''  # convert back to string
+    end
     
     # private class methods:
     

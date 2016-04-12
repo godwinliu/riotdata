@@ -14,32 +14,65 @@ module RiotData
   class Champion < RiotDataObject
     include Singleton
     # include RiotDataConnector
+
+    def initialize
+      @champ_data = Hash.new
+    end
     
     def list
       @champ_list || load_champs_list
     end
 
-    def fetch( riot_champ_id )
+    def get( riot_champ_id, force_reload = false )
       raise "champion_id must be on riot's list" unless list.keys.include?( riot_champ_id )
+      unless force_reload || @champ_data[riot_champ_id].nil?
+        return @champ_data[riot_champ_id]
+      else
+        @champ_data[riot_champ_id] = fetch( riot_champ_id )
+      end
+    end
+
+    def show( riot_champ_id, format = :text )
+      raise "champion_id must be on riot's list" unless list.keys.include?( riot_champ_id )
+      c = get( riot_champ_id )
+      # puts "Data returned: #{c}\n\n"
+      out = "\nChampion Data for:\n"
+      out << "\n\t#{c[:name].upcase} - #{c[:title]}\n"
+      out << "\n\tPassive: #{c[:passive][:name]}\n"
+      out << "\t#{c[:passive][:desc]}\n"
+      c[:spells].each do |sk, sv|
+        out << "\n\t#{sv[:name]} (#{sk})\n"
+        out << "\t"
+        out << word_wrap(sv[:desc], {separator: "\n\t"})
+        out << "\n"
+      end
+      return out
+    end
+    
+    private
+    
+    def fetch( riot_champ_id )
       uri = static_uri( CHAMP_DATA_PATH + '/' + riot_champ_id.to_s, {champData: 'all'} )
       r = fetch_response( uri, true )
       ro = JSON.parse(r.body )
       
-      # [2016-Apr-11 GYL] inspect the json object
-      #    puts "Keys: #{ro.keys}\n\n"
-      #    nosubkeys = %w{ id key name title image }
-      #    ro.each do |k, v|
-      #      puts "\tKey: #{k}"
-      #      puts "\t\tValues: #{v}\n\n"
-      #      # puts "Subkeys: #{v.keys}\n" unless nosubkeys.include?( k )
-      #    end
+      # # [2016-Apr-11 GYL] inspect the json object
+      # puts "Keys: #{ro.keys}\n\n"
+      # nosubkeys = %w{ id key name title image }
+      # ro.each do |k, v|
+      #   puts "\tKey: #{k}"
+      #   puts "\t\tValues: #{v}\n\n"
+      #   # puts "Subkeys: #{v.keys}\n" unless nosubkeys.include?( k )
+      # end
 
       c = Hash.new
       if ro
         ro.each do |k, v|
           case k
-          when 'key'
-            c[:key] = v
+          when 'id'
+            c[:riot_id] = v
+          when 'name'
+            c[:name] = v
           when 'title'
             c[:title] = v
           when 'image'
@@ -82,8 +115,6 @@ module RiotData
       end
       return c
     end
-    
-    private
     
     def load_champs_list
       uri = static_uri( CHAMP_DATA_PATH, { champData: 'image'} )

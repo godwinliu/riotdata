@@ -11,6 +11,7 @@ class TestChampion < Minitest::Test
 
   # save some typing
   RC = RiotData::Champion
+  TEST_CHAMP = 75 # Nasus
   
   def test_champion_should_be_singleton_class
     assert_raises( NoMethodError) { c = RC.new }
@@ -30,6 +31,12 @@ class TestChampion < Minitest::Test
     assert RC.api_key?, "should return true for existing key"
   end
 
+  def test_test_harness_champ_should_be_valid
+    c = setup_active_test
+    cl = c.list
+    assert cl.keys.include?( TEST_CHAMP ), "test champ should be on the full champ list"
+  end
+  
   def test_get_champion_list
     c = setup_active_test
     testchamp = 75  # should be Nasus
@@ -44,13 +51,11 @@ class TestChampion < Minitest::Test
     assert_equal( testimagename, cl[testchamp][:image] )
   end
 
-  def test_should_fetch_champion_info
+  def test_should_show_champion_info
     c = setup_active_test
-    testchamp = 75  # should be Nasus
-    cl = c.list
-    assert cl.keys.include?( testchamp ), "the champ requested (for testing) should be on the full champ list"
-    assert cdata = c.fetch( testchamp )
-    expected_keys = [ :key, :title, :image, :stats, :spells, :passive ]
+    testchamp = TEST_CHAMP  # should be Nasus
+    assert cdata = c.get( testchamp )
+    expected_keys = [ :riot_id, :name, :title, :image, :stats, :spells, :passive ]
     expected_keys.each do |k|
       assert cdata[k], "champ returned should have key: :#{k}"
 #      puts "\tKey: #{k}"
@@ -61,9 +66,29 @@ class TestChampion < Minitest::Test
 #      end
     end
     assert_equal( 4, cdata[:spells].size, "there should be 4 spells")
-    flunk "TODO - write test"
+    # TODO - create proper test for no fetch
+    # assert cdata = c.show(testchamp), "second show should not need to fetch"
+    os = c.show( testchamp, :text )
+    assert os.is_a?( String ), "should return an output string, instead it is #{os.class}"
+    # puts os
   end
-  
+
+  def test_should_raise_if_invalid_champion
+    c = setup_active_test
+    testchamp = -1  # assume there is no -1 champion
+    cl = c.list
+    assert !cl.keys.include?( testchamp ), "the champ requested should not be on the list"
+    assert_raises( RuntimeError ) { c.get(testchamp) }
+  end
+
+  def test_should_not_reload_if_champion_requested_again
+    skip "TODO - create proper test for no fetch"
+  end
+
+  def test_should_respect_force_reload_for_show_champion
+    skip "TODO - create proper test for respecting the force_reload"
+  end
+
   private
   
   def set_api_key( key )
@@ -75,4 +100,5 @@ class TestChampion < Minitest::Test
     c = RC.instance
     return c
   end
+
 end
