@@ -84,7 +84,7 @@ module RiotData
       unless uri.is_a?( URI::HTTPS ) then raise "bad uri for data request"; end
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
-      puts "\n\tFetching URI: #{uri.to_s}" if log
+      puts "\tFetching URI: #{uri.to_s}" if log
       http.get(uri.request_uri)
       # TODO - implement some error handling here
     end

@@ -6,6 +6,7 @@
 
 require_relative 'riot_data_object'
 require_relative 'summoner'
+require_relative 'champion'
 
 module RiotData
   class Runner
@@ -15,7 +16,7 @@ module RiotData
       # put options parser here
     end
 
-    def run( search_name )
+    def summ( search_name )
       id = Summoner.search_name( search_name )
       unless id.nil?
         s = Summoner.new( id )
@@ -27,5 +28,14 @@ module RiotData
       end
     end
 
+    def champ( search_champ )
+      # TODO - implement the search
+      id = 75  # start with nasus
+      unless id.nil?
+        co = Champion.instance
+        puts co.show( id )
+      end
+      
+    end
   end
 end

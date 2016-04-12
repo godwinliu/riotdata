@@ -74,7 +74,7 @@ class TestRiotDataObject < Minitest::Test
     assert set_api_key(key)
     assert_equal( expected, o.static_uri(path) )
   end
-  
+
   def test_should_form_data_api_uri
     key = get_fake_key
     path = get_fake_path
@@ -119,10 +119,8 @@ class TestRiotDataObject < Minitest::Test
   end
 
   def test_instances_should_be_able_to_fetch_api_responses
-    key = get_valid_key
+    o = setup_valid_instance
     path = get_valid_path
-    assert set_api_key(key)
-    o = RDO.new
     assert uri = o.api_uri( path )
     assert res = o.fetch_response( uri )
     assert_equal(Net::HTTPOK, res.class)
@@ -142,6 +140,13 @@ class TestRiotDataObject < Minitest::Test
     expect_default = 'America - Toronto'
     assert_equal( expect_default, tz.to_s )
   end
+
+  def test_instance_should_have_word_wrap
+    o = setup_valid_instance
+    assert_equal( 1, get_lorem_ipsum.split("\n").size, "lorem ipsum in one line" )
+    assert out = o.word_wrap( get_lorem_ipsum )
+    assert_equal( 6, out.split("\n").size, "line width 80 should produce 6 lines" )
+  end
   
   private
 
@@ -156,5 +161,10 @@ class TestRiotDataObject < Minitest::Test
   def set_api_key( key )
     RiotData::RiotDataObject.api_key = key
   end
-  
+
+  def setup_valid_instance
+    key = get_valid_key
+    assert set_api_key(key)
+    RDO.new
+  end
 end

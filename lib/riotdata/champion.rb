@@ -36,8 +36,8 @@ module RiotData
       raise "champion_id must be on riot's list" unless list.keys.include?( riot_champ_id )
       c = get( riot_champ_id )
       # puts "Data returned: #{c}\n\n"
-      out = "\nChampion Data for:\n"
-      out << "\n\t#{c[:name].upcase} - #{c[:title]}\n"
+      # out = "\nChampion Data for:\n"
+      out = "\n\t#{c[:name].upcase} - #{c[:title]}\n"
       out << "\n\tPassive: #{c[:passive][:name]}\n"
       out << "\t#{c[:passive][:desc]}\n"
       c[:spells].each do |sk, sv|

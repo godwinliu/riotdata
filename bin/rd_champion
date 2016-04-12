@@ -1,16 +1,15 @@
 #! /usr/bin/env ruby
 
-# rd_summoner.rb
+# rd_champion.rb
 #
-#  utility app to get data about a summoner from the
+#  utility app to get data about a champion from the
 #  riot inc. league of legends pvp.net data api server
 #
 #  Copyright (c) 2016 Godwin Liu, All Rights Reserved.
 
-# require 'optparse"  # overkill for our app at this point, just use ARGV
 require 'riotdata/runner'
 
-default_summ = "grandfromage".freeze
+default_champ = "Nasus".freeze
 riotkey = ENV['RIOT_KEY']
 
 # opts = OptionParser.new
@@ -19,9 +18,9 @@ puts "Run with #{ARGV.size} options: #{ARGV.join(', ')}"
 
 runner = RiotData::Runner.new riotkey
 if ARGV.size == 1 && ARGV[0].is_a?( String )
-  search_summ = ARGV[0]
-  runner.summ search_summ
+  search_champ = ARGV[0]
+  runner.champ search_champ
 else
-  runner.summ default_summ
+  runner.champ default_champ
 end
 
