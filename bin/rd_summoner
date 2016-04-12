@@ -1,9 +1,9 @@
 #! /usr/bin/env ruby
 
-# riotdata.rb
+# rd_summoner.rb
 #
-#  utility app to get data from the riot league of legends
-#  data api server
+#  utility app to get data about a summoner from the
+#  riot inc. league of legends pvp.net data api server
 #
 #  Copyright (c) 2016 Godwin Liu, All Rights Reserved.
 

@@ -43,6 +43,26 @@ class TestChampion < Minitest::Test
     assert cl[testchamp].include?( :image ), "the array should include champion's image"
     assert_equal( testimagename, cl[testchamp][:image] )
   end
+
+  def test_should_fetch_champion_info
+    c = setup_active_test
+    testchamp = 75  # should be Nasus
+    cl = c.list
+    assert cl.keys.include?( testchamp ), "the champ requested (for testing) should be on the full champ list"
+    assert cdata = c.fetch( testchamp )
+    expected_keys = [ :key, :title, :image, :stats, :spells, :passive ]
+    expected_keys.each do |k|
+      assert cdata[k], "champ returned should have key: :#{k}"
+#      puts "\tKey: #{k}"
+#      if k == :spells
+#        puts "\t\tSpell keys: #{cdata[k].values.first.keys}"
+#      else
+#        puts "\t\tValues: #{cdata[k]}"
+#      end
+    end
+    assert_equal( 4, cdata[:spells].size, "there should be 4 spells")
+    flunk "TODO - write test"
+  end
   
   private
   
