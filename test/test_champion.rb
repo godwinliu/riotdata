@@ -17,20 +17,34 @@ class TestChampion < Minitest::Test
     assert_raises( NoMethodError) { c = RC.new }
   end
 
-  def test_should_be_able_to_set_api_key
-    key = get_fake_key
-    c = RC.instance
-    assert set_api_key( key )
+  def test_search_for_champion
+    c = setup_active_test
+    assert c_id = c.search_name( "Vel'koz"), "should find the key for the champion (case insensitive)"
+    assert c_id.is_a?( Integer ), "should return the id for an existing champion"
+    assert c.get( c_id ), "should get the found champ"
+    refute c.search_name( "Betty Boop"), "should not find a key for non-champion"
   end
 
-  def test_should_be_able_to_test_api_keyexist
-    c = RC.instance
-    refute set_api_key( nil), "should delete key"
-    refute RC.api_key?, "should return false for no key"
-    assert set_api_key( get_fake_key)
-    assert RC.api_key?, "should return true for existing key"
-  end
+  # [2016-Apr-12 GYL] should delete these api_key tests, as now
+  #                   we're once again inheriting from riot_data_object
+  #                   (and test there instead of here)
+  
+#  def test_should_be_able_to_set_api_key
+#    key = get_fake_key
+#    c = RC.instance
+#    assert set_api_key( key )
+#  end
 
+#  def test_should_be_able_to_test_api_keyexist
+#    c = RC.instance
+#    refute set_api_key( nil), "should delete key"
+#    refute RC.api_key?, "should return false for no key"
+#    assert set_api_key( get_fake_key)
+#    assert RC.api_key?, "should return true for existing key"
+#  end
+
+  # instance tests
+  
   def test_test_harness_champ_should_be_valid
     c = setup_active_test
     cl = c.list

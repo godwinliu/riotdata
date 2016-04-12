@@ -17,7 +17,8 @@ module RiotData
     # include RiotDataConnector
 
     VARS_DECODE = { 'attackdamage' => 'AD',
-                    'spelldamage' => 'AP' }
+                    'spelldamage' => 'AP',
+                    'bonusattackdamage' => 'bonus AD'}
     def initialize
       @champ_data = Hash.new
     end
@@ -26,6 +27,12 @@ module RiotData
       @champ_list || load_champs_list
     end
 
+    def search_name( name )
+      raise "search_name needs string for search" unless name.is_a?( String )
+      found = list.select {|k, v| v[:name].downcase == name.strip.downcase }
+      return found.keys.first
+    end
+    
     def get( riot_champ_id, force_reload = false )
       raise "champion_id must be on riot's list" unless list.keys.include?( riot_champ_id )
       unless force_reload || @champ_data[riot_champ_id].nil?
@@ -42,7 +49,9 @@ module RiotData
       # out = "\nChampion Data for:\n"
       out = "\n\t#{c[:name].upcase} - #{c[:title]}\n"
       out << "\n\tPassive: #{c[:passive][:name]}\n"
-      out << "\t#{c[:passive][:desc]}\n"
+      out << "\t"
+      out << word_wrap(c[:passive][:desc], {separator: "\n\t"})
+      out << "\n"
       c[:spells].each do |sk, sv|
         out << "\n\t#{sv[:name]} (#{sv[:hotkey]})\n"
         out << "\t"
@@ -157,10 +166,13 @@ module RiotData
       raise 'invalid vars data' unless vars.is_a?( Array )
       desc.gsub(/\{\{\s([af]\d)\s\}\}/) do
         v = (vars.select {|x| x['key'] == $1}).first
-        if v['coeff'].size == 1
+        if v && v['coeff'].size == 1
           "#{v['coeff'].first}*#{VARS_DECODE[v['link']] ? VARS_DECODE[v['link']] : v['link']}"
         else
-          "UNKNOWN"
+          puts "failed - matching '#{$1}' versus '#{vars.map {|x| x['key']}}'"
+          puts vars
+          puts "Failed decode - \ndesc: #{desc}\nvars:#{vars.to_yaml}"
+          "UNKNOWN (decoding #{$1})"
         end
       end # var replacement
     end

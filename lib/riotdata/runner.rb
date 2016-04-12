@@ -28,14 +28,14 @@ module RiotData
       end
     end
 
-    def champ( search_champ )
-      # TODO - implement the search
-      id = 75  # start with nasus
+    def champ( search_champ = "Nasus" )
+      co = Champion.instance
+      id = co.search_name( search_champ ) 
       unless id.nil?
-        co = Champion.instance
         puts co.show( id )
+      else
+        puts "\n\n*** No champion found by that name"
       end
-      
     end
   end
 end
