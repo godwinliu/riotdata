@@ -7,6 +7,7 @@
 require_relative 'riot_data_object'
 require 'json'
 require 'singleton'
+require 'yaml'
 
 # require_relative 'riot_data_connector'
 
@@ -45,6 +46,10 @@ module RiotData
         out << "\t"
         out << word_wrap(sv[:desc], {separator: "\n\t"})
         out << "\n"
+        # raw data for debugging:
+        puts sv[:raw].to_yaml  # print to yaml
+        # rawsplit = sv[:raw].to_s.gsub(/(\"\w+\"=>)/, "\n\\1")
+        # out << "\n\tRAW:\n\t#{word_wrap(rawsplit, {separator: "\n\t"})}"
       end
       return out
     end
@@ -89,7 +94,7 @@ module RiotData
                   skey[:name] = sv
                 when 'sanitizedDescription'
                   skey[:desc_short] = sv
-                when 'tooltip'
+                when 'sanitizedTooltip'  # tooltip also available with color suggestion
                   skey[:desc] = sv
                 end
               end
