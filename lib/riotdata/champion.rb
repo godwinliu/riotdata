@@ -53,7 +53,7 @@ module RiotData
       out << word_wrap(c[:passive][:desc], {separator: "\n\t"})
       out << "\n"
       c[:spells].each do |sk, sv|
-        out << "\n\t#{sv[:name]} (#{sv[:hotkey]})\n"
+        out << "\n\t#{sv[:name]} (#{sv[:hotkey]} - #{sk})\n"
         out << "\t"
         out << word_wrap(sv[:desc], {separator: "\n\t"})
         out << "\n"
@@ -178,9 +178,13 @@ module RiotData
     end
 
     def decode_spellkey( spell_key )
+      # turns out this does not work properly for every champion
+      #  the naming convention is not consistent
+      valid_hotkeys = %w{ Q W E R }
       raise "invalid spell_key" unless spell_key.is_a?( String )
-      spell_key[-1]
+      valid_hotkeys.include?(spell_key[-1]) ? spell_key[-1] : "?"
     end
+
   end  # class Champion
 end
 
