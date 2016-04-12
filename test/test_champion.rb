@@ -56,14 +56,14 @@ class TestChampion < Minitest::Test
     testchamp = TEST_CHAMP  # should be Nasus
     assert cdata = c.get( testchamp )
     expected_keys = [ :riot_id, :name, :title, :image, :stats, :spells, :passive ]
+    valid_hotkeys = %w{ Q W E R }
     expected_keys.each do |k|
       assert cdata[k], "champ returned should have key: :#{k}"
-#      puts "\tKey: #{k}"
-#      if k == :spells
-#        puts "\t\tSpell keys: #{cdata[k].values.first.keys}"
-#      else
-#        puts "\t\tValues: #{cdata[k]}"
-#      end
+      if k == :spells
+        cdata[k].each do |sk, spell|
+          assert valid_hotkeys.include?(spell[:hotkey]), "#{spell[:hotkey]} should be within #{valid_hotkeys}"
+        end
+      end
     end
     assert_equal( 4, cdata[:spells].size, "there should be 4 spells")
     # TODO - create proper test for no fetch

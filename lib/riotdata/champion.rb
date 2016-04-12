@@ -16,6 +16,8 @@ module RiotData
     include Singleton
     # include RiotDataConnector
 
+    VARS_DECODE = { 'attackdamage' => 'AD',
+                    'spelldamage' => 'AP' }
     def initialize
       @champ_data = Hash.new
     end
@@ -42,12 +44,12 @@ module RiotData
       out << "\n\tPassive: #{c[:passive][:name]}\n"
       out << "\t#{c[:passive][:desc]}\n"
       c[:spells].each do |sk, sv|
-        out << "\n\t#{sv[:name]} (#{sk})\n"
+        out << "\n\t#{sv[:name]} (#{sv[:hotkey]})\n"
         out << "\t"
         out << word_wrap(sv[:desc], {separator: "\n\t"})
         out << "\n"
         # raw data for debugging:
-        puts sv[:raw].to_yaml  # print to yaml
+        # puts sv[:raw].to_yaml  # print to yaml
         # rawsplit = sv[:raw].to_s.gsub(/(\"\w+\"=>)/, "\n\\1")
         # out << "\n\tRAW:\n\t#{word_wrap(rawsplit, {separator: "\n\t"})}"
       end
@@ -99,6 +101,7 @@ module RiotData
                 end
               end
               skey[:desc] = process_spell( s )
+              skey[:hotkey] = decode_spellkey( s['key'] )
               # for debugging:
               skey[:raw] = s
             end
@@ -137,13 +140,34 @@ module RiotData
       # p spell_hash
       raise "invalid spell data" unless spell_hash.is_a?( Hash)
       # spell_hash['sanitizedTooltip']
-      effect_sub( spell_hash['sanitizedTooltip'], spell_hash['effectBurn'] )
+      s = effect_sub( spell_hash['sanitizedTooltip'], spell_hash['effectBurn'] )
+      if spell_hash['vars']
+        s = var_sub( s, spell_hash['vars'] )
+      end
+      return s
     end
     
     def effect_sub( desc, effect_burn )
       raise 'invalid effect data' unless effect_burn.is_a?( Array )
       # puts "Effectburn: #{effect_burn}"
       desc.gsub(/\{\{\se(\d)\s\}\}/) { effect_burn[$1.to_i] }
+    end
+
+    def var_sub( desc, vars )
+      raise 'invalid vars data' unless vars.is_a?( Array )
+      desc.gsub(/\{\{\s([af]\d)\s\}\}/) do
+        v = (vars.select {|x| x['key'] == $1}).first
+        if v['coeff'].size == 1
+          "#{v['coeff'].first}*#{VARS_DECODE[v['link']] ? VARS_DECODE[v['link']] : v['link']}"
+        else
+          "UNKNOWN"
+        end
+      end # var replacement
+    end
+
+    def decode_spellkey( spell_key )
+      raise "invalid spell_key" unless spell_key.is_a?( String )
+      spell_key[-1]
     end
   end  # class Champion
 end
