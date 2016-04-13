@@ -67,7 +67,7 @@ class TestChampion < Minitest::Test
 
   def test_should_show_champion_info
     c = setup_active_test
-    testchamp = TEST_CHAMP  # should be Nasus
+    testchamp = 21  # should be MF (miss fortune) who had non-decodable hotkeys
     assert cdata = c.get( testchamp )
     expected_keys = [ :riot_id, :name, :title, :image, :stats, :spells, :passive ]
     valid_hotkeys = %w{ Q W E R }
@@ -76,7 +76,10 @@ class TestChampion < Minitest::Test
       if k == :spells
         cdata[k].each do |sk, spell|
           assert valid_hotkeys.include?(spell[:hotkey]), "#{spell[:hotkey]} should be within #{valid_hotkeys}"
+          assert spell[:image_url], "an image url for the spell should be found"
         end
+      elsif k == :passive
+        assert cdata[k][:image_url], "an image url for the passive should be found"
       end
     end
     assert_equal( 4, cdata[:spells].size, "there should be 4 spells")

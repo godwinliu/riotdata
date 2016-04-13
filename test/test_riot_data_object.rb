@@ -51,6 +51,20 @@ class TestRiotDataObject < Minitest::Test
     expected = "http://ddragon.leagueoflegends.com/cdn/" + TESTED_VER + "/img/champion/KogMaw.png"
     assert_equal( expected, i_url )
   end
+
+  def test_should_get_champ_passive_icon_url
+    assert set_api_key(get_valid_key)
+    img_name = "testimage.png"
+    assert i_url = RDO.champ_passive_icon_url( img_name )
+    expected = "http://ddragon.leagueoflegends.com/cdn/" + TESTED_VER + "/img/passive/" + img_name
+  end
+
+  def test_should_get_champ_ability_icon_url
+    assert set_api_key(get_valid_key)
+    img_name = "testimage.png"
+    assert i_url = RDO.champ_ability_icon_url( img_name )
+    expected = "http://ddragon.leagueoflegends.com/cdn/" + TESTED_VER + "/img/spell/" + img_name
+  end
   
   def test_should_raise_exception_if_no_api_key_for_uri
     path = get_fake_path

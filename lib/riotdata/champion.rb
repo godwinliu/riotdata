@@ -97,6 +97,7 @@ module RiotData
             c[:stats] = v
           when 'spells'
             ckey = c[:spells] = Hash.new
+            spellkey = %w{ Q W E R }
             v.each do |s|
               skey = ckey[s['key']] = Hash.new
               s.each do |sk, sv|
@@ -106,11 +107,14 @@ module RiotData
                 when 'sanitizedDescription'
                   skey[:desc_short] = sv
                 # when 'sanitizedTooltip'  # tooltip also available with color suggestion
-                #  skey[:desc] = sv
+                  #  skey[:desc] = sv
+                when 'image'
+                  skey[:image] = sv['full']
+                  skey[:image_url] = Champion.champ_ability_icon_url( sv['full'])
                 end
               end
               skey[:desc] = process_spell( s )
-              skey[:hotkey] = decode_spellkey( s['key'] )
+              skey[:hotkey] = spellkey.shift
               # for debugging:
               skey[:raw] = s
             end
@@ -124,6 +128,7 @@ module RiotData
                 cpass[:desc] = pv
               when 'image'
                 cpass[:image] = pv['full']
+                cpass[:image_url] = Champion.champ_passive_icon_url( pv['full'] )
               end
             end
           end
@@ -169,20 +174,12 @@ module RiotData
         if v && v['coeff'].size == 1
           "#{v['coeff'].first}*#{VARS_DECODE[v['link']] ? VARS_DECODE[v['link']] : v['link']}"
         else
-          puts "failed - matching '#{$1}' versus '#{vars.map {|x| x['key']}}'"
-          puts vars
-          puts "Failed decode - \ndesc: #{desc}\nvars:#{vars.to_yaml}"
+          # puts "failed - matching '#{$1}' versus '#{vars.map {|x| x['key']}}'"
+          # puts vars
+          # puts "Failed decode - \ndesc: #{desc}\nvars:#{vars.to_yaml}"
           "UNKNOWN (decoding #{$1})"
         end
       end # var replacement
-    end
-
-    def decode_spellkey( spell_key )
-      # turns out this does not work properly for every champion
-      #  the naming convention is not consistent
-      valid_hotkeys = %w{ Q W E R }
-      raise "invalid spell_key" unless spell_key.is_a?( String )
-      valid_hotkeys.include?(spell_key[-1]) ? spell_key[-1] : "?"
     end
 
   end  # class Champion

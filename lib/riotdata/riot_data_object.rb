@@ -28,6 +28,8 @@ module RiotData
   VERSION_PATH = '/v1.2/versions'.freeze
 
   CHAMP_IMAGE_PATH = '/img/champion'.freeze
+  CHAMP_PASSIVE_IMAGE_PATH = '/img/passive'.freeze
+  CHAMP_ABILITY_IMAGE_PATH = '/img/spell'.freeze
   DEFAULT_TZ = 'America/Toronto'
   
   class RiotDataObject
@@ -59,6 +61,16 @@ module RiotData
     def self.champ_image_icon_url( champ_id )
       raise "invalid champ_id" unless self.champs.include?( champ_id )
       return STATIC_SERVER_URL + '/' + self.current_version + CHAMP_IMAGE_PATH + '/' + self.champs[champ_id][:image]
+    end
+
+    def self.champ_passive_icon_url( image_name )
+      raise "invalid image_name" unless image_name.is_a?( String )
+      return STATIC_SERVER_URL + '/' + self.current_version + CHAMP_PASSIVE_IMAGE_PATH + '/' + image_name
+    end
+
+    def self.champ_ability_icon_url( image_name )
+      raise "invalid image_name" unless image_name.is_a?( String )
+      return STATIC_SERVER_URL + '/' + self.current_version + CHAMP_ABILITY_IMAGE_PATH + '/' + image_name
     end
     
     def self.static_uri( path, params = {} )
