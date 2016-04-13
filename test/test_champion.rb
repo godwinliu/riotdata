@@ -80,6 +80,14 @@ class TestChampion < Minitest::Test
         end
       elsif k == :passive
         assert cdata[k][:image_url], "an image url for the passive should be found"
+      elsif k == :stats
+        assert cdata[k].is_a?( Hash )
+        statkeys = ['armor', 'attackdamage']
+        statkeys.each do |sk|
+          assert cdata[k].keys.include?( sk ), "stat keys should include '#{sk}'"
+        end
+        assert cdata[k]['armor'].keys.include?( :base ), "armor stat should have a :base component"
+        assert cdata[k]['armor'].keys.include?( :perlevel ), "armor stat should have a :perlevel component"
       end
     end
     assert_equal( 4, cdata[:spells].size, "there should be 4 spells")

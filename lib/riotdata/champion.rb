@@ -48,6 +48,13 @@ module RiotData
       # puts "Data returned: #{c}\n\n"
       # out = "\nChampion Data for:\n"
       out = "\n\t#{c[:name].upcase} - #{c[:title]}\n"
+      out << "\n\tStats:"
+      c[:stats].each do |stat, v|
+        out << "\n\t#{'%18.18s' % stat.capitalize}: #{v[:base]}"
+        out << " + (#{v[:perlevel]}/lvl)" if v[:perlevel]
+        out << "\t= max: #{(v[:base] + (v[:perlevel].to_f * 17)).round(1)}" if v[:perlevel]
+      end
+      out << "\n"
       out << "\n\tPassive: #{c[:passive][:name]}\n"
       out << "\t"
       out << word_wrap(c[:passive][:desc], {separator: "\n\t"})
@@ -94,7 +101,7 @@ module RiotData
           when 'image'
             c[:image] = v['full']
           when 'stats'
-            c[:stats] = v
+            c[:stats] = process_stats( v )
           when 'spells'
             ckey = c[:spells] = Hash.new
             spellkey = %w{ Q W E R }
@@ -150,6 +157,16 @@ module RiotData
       return @champ_list
     end
 
+    def process_stats( stat_hash )
+      raise "invalid stat_hash" unless stat_hash.is_a?( Hash )
+      # process base stats first
+      bstat = stat_hash.reject {|k, v| /perlevel/ =~ k }
+      bstat.each do |k, v|
+        bstat[k] = { base: v, perlevel: stat_hash.fetch(k+'perlevel', nil) }
+      end
+      return bstat
+    end
+    
     def process_spell( spell_hash )
       # p spell_hash
       raise "invalid spell data" unless spell_hash.is_a?( Hash)
