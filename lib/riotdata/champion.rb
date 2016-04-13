@@ -19,6 +19,21 @@ module RiotData
     VARS_DECODE = { 'attackdamage' => 'AD',
                     'spelldamage' => 'AP',
                     'bonusattackdamage' => 'bonus AD'}
+
+    STATS_DECODE = {
+      'armor' => 'Armor',
+      'attackdamage' => 'Attack Damage (AD)',
+      'attackrange' => 'Attack Range',
+      'attackspeedoffset' => 'AA Delay',
+      'crit' => 'Crit',
+      'hp' => 'HP',
+      'hpregen' => 'HP Regen',
+      'movespeed' => 'Move Speed (MS)',
+      'mp' => 'Mana/Energy',
+      'mpregen' => 'Mana/Energy Regen',
+      'spellblock' => 'Magic Resist (MR)'
+    }
+    
     def initialize
       @champ_data = Hash.new
     end
@@ -50,9 +65,9 @@ module RiotData
       out = "\n\t#{c[:name].upcase} - #{c[:title]}\n"
       out << "\n\tStats:"
       c[:stats].each do |stat, v|
-        out << "\n\t#{'%18.18s' % stat.capitalize}: #{v[:base]}"
+        out << "\n\t#{'%18.18s' % stat}: #{v[:base]}"
         out << " + (#{v[:perlevel]}/lvl)" if v[:perlevel]
-        out << "\t= max: #{(v[:base] + (v[:perlevel].to_f * 17)).round(1)}" if v[:perlevel]
+        out << "\t= max: #{(v[:base] + (v[:perlevel].to_f * 17)).round(2)}" if v[:perlevel]
       end
       out << "\n"
       out << "\n\tPassive: #{c[:passive][:name]}\n"
@@ -163,6 +178,14 @@ module RiotData
       bstat = stat_hash.reject {|k, v| /perlevel/ =~ k }
       bstat.each do |k, v|
         bstat[k] = { base: v, perlevel: stat_hash.fetch(k+'perlevel', nil) }
+      end
+
+      # then rename with friendlier titles, if available
+      STATS_DECODE.each do |k, v|
+        if bstat.keys.include?( k )
+          bstat[STATS_DECODE[k]] = bstat[k]
+          bstat.delete(k)
+        end
       end
       return bstat
     end
