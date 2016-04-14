@@ -78,7 +78,9 @@ module RiotData
         out << "\n\t#{sv[:name]} (#{sv[:hotkey]} - #{sk})\n"
         out << "\t"
         out << word_wrap(sv[:desc], {separator: "\n\t"})
-        out << "\n"
+        out << "\n\t\tCost: "
+        out << word_wrap(sv[:cost], {separator: "\n\t\t"})
+        out << "\n\t\tCooldown: #{sv[:cooldown]}\n"
         # raw data for debugging:
         # puts sv[:raw].to_yaml  # print to yaml
         # rawsplit = sv[:raw].to_s.gsub(/(\"\w+\"=>)/, "\n\\1")
@@ -118,41 +120,9 @@ module RiotData
           when 'stats'
             c[:stats] = process_stats( v )
           when 'spells'
-            ckey = c[:spells] = Hash.new
-            spellkey = %w{ Q W E R }
-            v.each do |s|
-              skey = ckey[s['key']] = Hash.new
-              s.each do |sk, sv|
-                case sk
-                when 'name'
-                  skey[:name] = sv
-                when 'sanitizedDescription'
-                  skey[:desc_short] = sv
-                # when 'sanitizedTooltip'  # tooltip also available with color suggestion
-                  #  skey[:desc] = sv
-                when 'image'
-                  skey[:image] = sv['full']
-                  skey[:image_url] = Champion.champ_ability_icon_url( sv['full'])
-                end
-              end
-              skey[:desc] = process_spell( s )
-              skey[:hotkey] = spellkey.shift
-              # for debugging:
-              skey[:raw] = s
-            end
+            c[:spells] = process_spells( v )
           when 'passive'
-            cpass = c[:passive] = Hash.new
-            v.each do |pk, pv|
-              case pk
-              when 'name'
-                cpass[:name] = pv
-              when 'sanitizedDescription'
-                cpass[:desc] = pv
-              when 'image'
-                cpass[:image] = pv['full']
-                cpass[:image_url] = Champion.champ_passive_icon_url( pv['full'] )
-              end
-            end
+            c[:passive] = process_passive( v )
           end
         end # processing json object
         # for debugging:
@@ -189,8 +159,52 @@ module RiotData
       end
       return bstat
     end
+
+    def process_passive( pass_hash )
+      raise "invalid passive data" unless pass_hash.is_a?( Hash )
+      cpass = Hash.new
+      pass_hash.each do |pk, pv|
+        case pk
+        when 'name'
+          cpass[:name] = pv
+        when 'sanitizedDescription'
+          cpass[:desc] = pv
+        when 'image'
+          cpass[:image] = pv['full']
+          cpass[:image_url] = Champion.champ_passive_icon_url( pv['full'] )
+        end
+      end
+      return cpass
+    end
     
-    def process_spell( spell_hash )
+    def process_spells( spells )
+      raise "invalid spell data" unless spells.is_a?( Array )
+      ckey = Hash.new
+      spellbutton = %w{ Q W E R }
+      spells.each do |s|
+        skey = ckey[s['key']] = Hash.new
+        s.each do |sk, sv|
+          case sk
+          when 'name'
+            skey[:name] = sv
+          when 'sanitizedDescription'  # sanitizedTooltip is another option
+            skey[:desc_short] = sv
+          when 'image'
+            skey[:image] = sv['full']
+            skey[:image_url] = Champion.champ_ability_icon_url( sv['full'])
+          when 'cooldownBurn'
+            skey[:cooldown] = sv
+          end
+        end # each key for an individual spell
+        skey[:desc] = process_spell_desc( s )
+        skey[:cost] = process_spell_cost( s )
+        skey[:hotkey] = spellbutton.shift
+        skey[:raw] = s   # for debugging
+      end # each spell
+      return ckey
+    end
+    
+    def process_spell_desc( spell_hash )
       # p spell_hash
       raise "invalid spell data" unless spell_hash.is_a?( Hash)
       # spell_hash['sanitizedTooltip']
@@ -222,6 +236,16 @@ module RiotData
       end # var replacement
     end
 
+    def process_spell_cost( spell_hash )
+      raise "invalid spell data" unless spell_hash.is_a?( Hash )
+      s = cost_sub( spell_hash['resource'], spell_hash['costBurn'] )
+      s = effect_sub( s, spell_hash['effectBurn'] )
+    end
+
+    def cost_sub( cost_desc, cost_burn )
+      raise 'invalid cost data' unless cost_burn.is_a?( String )
+      cost_desc.gsub(/\{\{\scost\s\}\}/) { cost_burn }
+    end
   end  # class Champion
 end
 

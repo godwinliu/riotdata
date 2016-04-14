@@ -74,9 +74,15 @@ class TestChampion < Minitest::Test
     expected_keys.each do |k|
       assert cdata[k], "champ returned should have key: :#{k}"
       if k == :spells
+        # TODO - more comprehensive tests of spell bounds -
+        #    errant descriptions, spells based on different kinds
+        #    of resources, etc...
         cdata[k].each do |sk, spell|
           assert valid_hotkeys.include?(spell[:hotkey]), "#{spell[:hotkey]} should be within #{valid_hotkeys}"
-          assert spell[:image_url], "an image url for the spell should be found"
+          expected_spell_keys = [:name, :desc_short, :image, :image_url, :cooldown, :desc, :cost, :hotkey]
+          expected_spell_keys.each do |sak|
+            assert spell[sak], "spell should have value for key ':#{sak}'"
+          end
         end
       elsif k == :passive
         assert cdata[k][:image_url], "an image url for the passive should be found"
