@@ -1,0 +1,29 @@
+#! /usr/bin/env ruby
+
+# rd_match
+#
+#  utility app to get data about a recent game for
+#  a summoner from the riot inc. league of legends
+#  pvp.net data api server
+#
+#  Copyright (c) 2016 Godwin Liu, All Rights Reserved.
+
+# require 'optparse"  # overkill for our app at this point, just use ARGV
+require 'riotdata/runner'
+
+default_summ = "grandfromage".freeze
+riotkey = ENV['RIOT_KEY']
+
+# opts = OptionParser.new
+# args = opts.parse(ARGV)
+puts "Run with #{ARGV.size} options: #{ARGV.join(', ')}"
+
+runner = RiotData::Runner.new riotkey
+if ARGV.size == 2 && ARGV[0].is_a?( String )
+  runner.match ARGV[0], ARGV[1].to_i
+elsif ARGV.size == 1 && ARGV[0].is_a?( String )
+  runner.match ARGV[0]
+else
+  runner.match default_summ
+end
+

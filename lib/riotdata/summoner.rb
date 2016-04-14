@@ -1,5 +1,4 @@
-# summoner.rb
-#
+#  summoner.rb
 #  Copyright (c) 2016 Godwin Liu, All Rights Reserved.
 
 require_relative 'riot_data_object'
