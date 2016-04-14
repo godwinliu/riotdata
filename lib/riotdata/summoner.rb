@@ -93,7 +93,9 @@ module RiotData
           @rg = []
         else
           @rg = ro['games'].map do |g|
-            { gametype: g['subType'],
+            {
+              game_id: g['gameId'],
+              gametype: g['subType'],
               gamelength: g['stats']['timePlayed'],
               gamedate: g['createDate'],
               champ_id: g['championId'],
@@ -106,7 +108,9 @@ module RiotData
               kda: kda( g['stats']['championsKilled'], g['stats']['numDeaths'], g['stats']['assists']),
               gold: g['stats']['goldEarned'],
               cs: g['stats']['minionsKilled'].to_i + g['stats']['neutralMinionsKilled'].to_i,
-              champ_dmg: g['stats']['totalDamageDealtToChampions'] }
+              champ_dmg: g['stats']['totalDamageDealtToChampions'],
+              raw: g
+            }
           end
         end # whether or not there's data
       end # force update
