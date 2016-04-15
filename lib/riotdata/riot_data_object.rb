@@ -130,16 +130,18 @@ module RiotData
     end
 
     def kda( kills, deaths, assists )
+      kills || kills = 0
+      deaths || deaths = 0
+      assists || assists = 0
       raise "invalid kda arguments" unless kills.is_a?(Integer) && deaths.is_a?(Integer) && assists.is_a?(Integer)
-      if deaths==0
+      if deaths.zero?
         return :perfect
       else
-        ((kills *1.0 + assists) / deaths).round(2)
+        return ((kills *1.0 + assists) / deaths).round(2)
       end
     end
 
     def kda_out( kills, deaths, assists)
-      raise "invalid kda arguments" unless kills.is_a?(Integer) && deaths.is_a?(Integer) && assists.is_a?(Integer)
       kda = self.kda( kills, deaths, assists)
       "#{kills}/#{deaths}/#{assists} (#{kda == :perfect ? 'Perfect' : ('kda=' + kda.to_s)})"
     end

@@ -125,7 +125,7 @@ module RiotData
         out << "(#{Summoner.convert_riot_time(g[:gamedate]).strftime('%Y %b %e %l:%M%P')})"
         out << "\t#{g[:win] ? 'WIN':'LOSS'}"
         out << "\tas #{'%-12.12s' % g[:champ]}:"
-        out << "\t#{g[:kills].to_i}/#{g[:deaths].to_i}/#{g[:assists].to_i}(#{g[:kda] == :perfect ? 'Perfect' : g[:kda]}),\t"
+        out << "\t#{kda_out(g[:kills].to_i, g[:deaths].to_i, g[:assists].to_i)},\t"
         out << gamelength(g[:gamelength])
         gpm = g[:gold].to_f / (g[:gamelength] / 60)
         cspm = g[:cs].to_f / (g[:gamelength] / 60)
@@ -168,16 +168,5 @@ module RiotData
       return "#{win}/#{loss}\t(n=#{n},\t#{(win.to_f*100/n).round(1)}%)"
     end
 
-    # calculate kda
-    def kda( kills, deaths, assists)
-      if deaths.nil? || deaths.zero? # avoid 0div
-        kda = :perfect
-      else
-        kills || kills = 0
-        assists || assists = 0
-        kda = (kills.to_f + assists) / deaths
-        kda.round(2)
-      end
-    end
   end
 end
