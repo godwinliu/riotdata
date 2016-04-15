@@ -168,6 +168,26 @@ class TestRiotDataObject < Minitest::Test
     expect = "38m 13s"
     assert_equal( expect, o.gamelength(gl), "should translate a game time into XXm YYs text")
   end
+
+  def test_instance_should_have_kda_calc
+    o = setup_valid_instance
+    k = 8; d = 7; a = 10
+    expect_kda = 2.57
+    assert_equal( expect_kda, o.kda(k, d, a), "should calculate kda to precision 2")
+    k = 3; d = 0; a = 6
+    expect_kda = :perfect
+    assert_equal( expect_kda, o.kda(k, d, a), "should calculate perfect kda (not div0)")
+  end
+
+  def test_instance_should_have_kda_out
+    o = setup_valid_instance
+    k = 8; d = 7; a = 10
+    expect_out = "8/7/10 (kda=2.57)"
+    assert_equal( expect_out, o.kda_out(k, d, a), "should create kda string to precision 2")
+    k = 3; d = 0; a = 6
+    expect_out = "3/0/6 (Perfect)"
+    assert_equal( expect_out, o.kda_out(k, d, a), "should create perfect kda string")
+  end
   
   private
 

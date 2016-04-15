@@ -28,7 +28,11 @@ module RiotData
       'twentyToThirty' => :t20to30,
       'thirtyToEnd' => :t30toEnd
     }
-                 
+    TEAM_DECODE = {
+      100 => 'Blue Team',
+      200 => 'Red Team'
+    }
+    
     def initialize( match_id = TEST_MATCH )
       @match_id = match_id
       @raw = load_match
@@ -104,6 +108,12 @@ module RiotData
 #      r = fetch_response(uri, true )
 #      JSON.parse( r.body )
 #    end
+
+    def self.load_detail( m_id )
+      uri = api_uri(MATCH_PATH + m_id.to_s, {includeTimeline: true} )
+      r = fetch_response(uri, true )
+      JSON.parse(r.body)
+    end
     
     private
 
@@ -117,10 +127,11 @@ module RiotData
       raise "invalid argument - should be a team (participant) hash" unless team.is_a?(Hash)
       out = String.new
       team_id = team.first[1][:team]
-      out << "\n\t\tTeam: #{team_id} #{'(** WIN **)' if teams[team_id][:winner]}"
+      out << "\n\t\tTeam: #{TEAM_DECODE[team_id]} #{'(** WIN **)' if teams[team_id][:winner]}"
       team.each do |k, v|
         out << "\n\t\t#{'%2.2s' % k}: #{'%6.6s' % v[:lane]} - #{'%-12.12s' % v[:role]}: "
         out << "#{'%13.13s' % v[:champ]}"
+        out << "  #{self.kda_out(v[:stats]['kills'].to_i, v[:stats]['deaths'].to_i, v[:stats]['assists'].to_i)}"
         out << "\t(#{v[:summoner]})" if v[:summoner]
       end
       return out

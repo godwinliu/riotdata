@@ -128,6 +128,21 @@ module RiotData
       glen = gl_inseconds.divmod(60)
       glen[0].to_s + "m " + glen[1].to_s + "s"
     end
+
+    def kda( kills, deaths, assists )
+      raise "invalid kda arguments" unless kills.is_a?(Integer) && deaths.is_a?(Integer) && assists.is_a?(Integer)
+      if deaths==0
+        return :perfect
+      else
+        ((kills *1.0 + assists) / deaths).round(2)
+      end
+    end
+
+    def kda_out( kills, deaths, assists)
+      raise "invalid kda arguments" unless kills.is_a?(Integer) && deaths.is_a?(Integer) && assists.is_a?(Integer)
+      kda = self.kda( kills, deaths, assists)
+      "#{kills}/#{deaths}/#{assists} (#{kda == :perfect ? 'Perfect' : ('kda=' + kda.to_s)})"
+    end
     
     # private class methods:
     

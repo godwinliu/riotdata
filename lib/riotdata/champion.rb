@@ -126,7 +126,7 @@ module RiotData
           end
         end # processing json object
         # for debugging:
-        # c[:raw] = ro
+        c[:raw] = ro
       end
       return c
     end
@@ -228,10 +228,13 @@ module RiotData
         if v && v['coeff'].size == 1
           "#{v['coeff'].first}*#{VARS_DECODE[v['link']] ? VARS_DECODE[v['link']] : v['link']}"
         else
-          # puts "failed - matching '#{$1}' versus '#{vars.map {|x| x['key']}}'"
-          # puts vars
-          # puts "Failed decode - \ndesc: #{desc}\nvars:#{vars.to_yaml}"
-          "UNKNOWN (decoding #{$1})"
+          # [2016-Apr-15 GYL] there looks to be long-standing api bugs
+          #    with many champions having incomplete definitions.
+          #    see:  https://developer.riotgames.com/discussion/bugs-feedback/show/3wU5Q4hE
+          #puts "failed - matching '#{$1}' versus '#{vars.map {|x| x['key']}}'"
+          #puts vars
+          #puts "Failed decode - \ndesc: #{desc}\nvars:#{vars.to_yaml}"
+          "(UNKNOWN #{$1})"
         end
       end # var replacement
     end
