@@ -69,7 +69,11 @@ module RiotData
         participants.each do |pk, pv|
           #out << "#{pk} - #{pv[:performance].to_yaml}"
           if outval = pv[:performance][:cpmd][tv]  # ensure these keys exist
-            out << "\n\t\t#{'%2.2s' % pk}: #{'%-20.20s' % pv[:summoner]} (/min deltas) -"
+            if pv[:summoner]
+              out << "\n\t\t#{'%2.2s' % pk}: #{'%-20.20s' % pv[:summoner]} (/min deltas) -"
+            else
+              out << "\n\t\t#{'%2.2s' % pk}: #{'%-20.20s' % pv[:champ]} (/min deltas) -"
+            end
             out << "\tcs: #{outval.round(1)}"
             field = participants.map {|k, v| v[:performance][:cpmd][tv]}
             out << ((field.inject(true) {|greatest, e| greatest && e <= outval}) ? "(*)" : "\t")
@@ -94,6 +98,12 @@ module RiotData
       end # timeblock
       return out
     end
+
+#    def self.load_match( m_id)
+#      uri = api_uri( MATCH_PATH + m_id.to_s )
+#      r = fetch_response(uri, true )
+#      JSON.parse( r.body )
+#    end
     
     private
 
