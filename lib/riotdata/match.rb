@@ -126,8 +126,15 @@ module RiotData
     def team_out( team )
       raise "invalid argument - should be a team (participant) hash" unless team.is_a?(Hash)
       out = String.new
+
+      tk = team.values.inject(0) {|kills, e| kills + e[:stats]['kills'].to_i}
+      td = team.values.inject(0) {|deaths, e| deaths + e[:stats]['deaths'].to_i}
+      ta = team.values.inject(0) {|assists, e| assists + e[:stats]['assists'].to_i}
+      
       team_id = team.first[1][:team]
-      out << "\n\t\tTeam: #{TEAM_DECODE[team_id]} #{'(** WIN **)' if teams[team_id][:winner]}"
+      out << "\n\t\tTeam: #{TEAM_DECODE[team_id]} "
+      out << " - #{kda_out(tk, td, ta)} - barons: #{teams[team_id][:barons]}, dragons: #{teams[team_id][:dragons]}"
+      out << "\t#{'(** WIN **)' if teams[team_id][:winner]}"
       team.each do |k, v|
         out << "\n\t\t#{'%2.2s' % k}: #{'%6.6s' % v[:lane]} - #{'%-12.12s' % v[:role]}: "
         out << "#{'%13.13s' % v[:champ]}"
@@ -192,7 +199,10 @@ module RiotData
       @raw['teams'].each do |t|
         ts[t['teamId']] = {
           raw: t,
-          winner: t['winner']
+          winner: t['winner'],
+          barons: t['baronKills'],
+          dragons: t['dragonKills'],
+          turrets: t['towerKills']
         }
       end
       return ts
