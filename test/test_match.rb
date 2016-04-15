@@ -19,6 +19,21 @@ class TestMatch < Minitest::Test
     assert m.match_id, "should return the match_id"
     assert_equal( TEST_MATCH, m.match_id )
     assert m.raw, "should return the raw parsed hash"
+
+    # and create readable attribs - these are not broken out, to minimize fetches
+    attribs = {
+      :raw => Hash,
+      :match_id => Integer,
+      :match_type => Hash,
+      :match_date => Integer,
+      :participants => Hash,
+      :teams => Hash
+    }
+
+    attribs.each do |k, v|
+      assert (res = m.send(k)), "match should respond to :#{k}"
+      assert res.is_a?( v ), "response to :#{k} should be of class '#{v}'"
+    end
   end
 
   private
