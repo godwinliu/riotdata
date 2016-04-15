@@ -122,6 +122,12 @@ module RiotData
         line.length > line_width ? line.gsub(/(.{1,#{line_width}})(\s+|$)/, "\\1" + separator).strip : line
       end * separator  # concat with the separator (and convert back to string)
     end
+
+    def gamelength( gl_inseconds )
+      raise "game length needed in seconds" unless gl_inseconds.is_a? Integer
+      glen = gl_inseconds.divmod(60)
+      glen[0].to_s + "m " + glen[1].to_s + "s"
+    end
     
     # private class methods:
     

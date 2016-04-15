@@ -161,6 +161,13 @@ class TestRiotDataObject < Minitest::Test
     assert out = o.word_wrap( get_lorem_ipsum )
     assert_equal( 6, out.split("\n").size, "line width 80 should produce 6 lines" )
   end
+
+  def test_instance_should_have_gamelength_out
+    o = setup_valid_instance
+    gl = 2293  # seconds
+    expect = "38m 13s"
+    assert_equal( expect, o.gamelength(gl), "should translate a game time into XXm YYs text")
+  end
   
   private
 

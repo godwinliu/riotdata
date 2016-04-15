@@ -126,8 +126,7 @@ module RiotData
         out << "\t#{g[:win] ? 'WIN':'LOSS'}"
         out << "\tas #{'%-12.12s' % g[:champ]}:"
         out << "\t#{g[:kills].to_i}/#{g[:deaths].to_i}/#{g[:assists].to_i}(#{g[:kda] == :perfect ? 'Perfect' : g[:kda]}),\t"
-        glen = g[:gamelength].divmod(60)
-        out << glen[0].to_s + "m" + glen[1].to_s + "s"
+        out << gamelength(g[:gamelength])
         gpm = g[:gold].to_f / (g[:gamelength] / 60)
         cspm = g[:cs].to_f / (g[:gamelength] / 60)
         out << "\tGold:#{g[:gold]}(#{gpm.round(1)}),\tCS:#{g[:cs]}(#{cspm.round(1)}), "

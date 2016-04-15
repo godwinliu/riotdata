@@ -12,11 +12,23 @@ module RiotData
 
   
   class Match < RiotDataObject
-    attr_reader :match_id, :raw, :match_type, :match_date, :participants,
-                :teams
+    attr_reader :match_id, :raw, :match_type, :match_date, :match_length,
+                :participants, :teams
 
     MATCH_MAPS = { 11 => "Summoner's Rift" }
-    
+    DELTA_STATS = {
+      cpmd: 'creepsPerMinDeltas',
+      xppmd: 'xpPerMinDeltas',
+      gpmd: 'goldPerMinDeltas',
+      tpmd: 'damageTakenPerMinDeltas'
+    }
+    TIME_BINS = {
+      'zeroToTen' => :t0to10,
+      'tenToTwenty' => :t10to20,
+      'twentyToThirty' => :t20to30,
+      'thirtyToEnd' => :t30toEnd
+    }
+                 
     def initialize( match_id = TEST_MATCH )
       @match_id = match_id
       @raw = load_match
@@ -35,21 +47,51 @@ module RiotData
       team1 = participants.select {|k, v| v[:team] == 100}
       team2 = participants.select {|k, v| v[:team] == 200}
 
-      team1id = team1.first[1][:team]
-      out << "\n\t\tTeam: #{team1id} #{'(** WIN **)' if teams[team1id][:winner]}"
-      team1.each do |k, v|
-        out << "\n\t\t#{k}: #{'%6.6s' % v[:lane]} - #{'%-12.12s' % v[:role]}: "
-        out << "#{v[:champ]} (#{v[:summoner]})"
-      end
-
+      out << team_out( team1 )
       out << "\n\n#{"\t"*5}Versus\n"
+      out << team_out( team2 )
 
-      team2id = team2.first[1][:team]
-      out << "\n\t\tTeam: #{team2id} #{'(** WIN **)' if teams[team2id][:winner]}"
-      team2.each do |k, v|
-        out << "\n\t\t#{k}: #{'%6.6s' % v[:lane]} - #{'%-12.12s' % v[:role]}: "
-        out << "#{v[:champ]} (#{v[:summoner]})"
-      end
+      # performance
+      out << "\n\n\tPerformance: (Gamelength: #{gamelength(match_length)} )\n"
+      TIME_BINS.each do |tk, tv|
+        case tv
+        when :t0to10
+          out << "\n\t0 to 10min:"
+        when :t10to20
+          out << "\n\t10 to 20min:"
+        when :t20to30
+          out << "\n\t20 to 30min:"
+        when :t30toEnd
+          out << "\n\t30 to end:"
+        else
+          out << "\n\tunknown time block:"
+        end
+        participants.each do |pk, pv|
+          #out << "#{pk} - #{pv[:performance].to_yaml}"
+          if outval = pv[:performance][:cpmd][tv]  # ensure these keys exist
+            out << "\n\t\t#{'%2.2s' % pk}: #{'%-20.20s' % pv[:summoner]} (/min deltas) -"
+            out << "\tcs: #{outval.round(1)}"
+            field = participants.map {|k, v| v[:performance][:cpmd][tv]}
+            out << ((field.inject(true) {|greatest, e| greatest && e <= outval}) ? "(*)" : "\t")
+          end
+          if outval = pv[:performance][:gpmd][tv]
+            out << "\tgold: #{outval.round(1)}"
+            field = participants.map {|k, v| v[:performance][:gpmd][tv]}
+            out << ((field.inject(true) {|greatest, e| greatest && e <= outval}) ? "(*)" : "")
+          end
+          if outval = pv[:performance][:xppmd][tv]
+            out << "\txp: #{outval.round(1)}"
+            field = participants.map {|k, v| v[:performance][:xppmd][tv]}
+            out << ((field.inject(true) {|greatest, e| greatest && e <= outval}) ? "(*)" : "")
+          end
+          if outval = pv[:performance][:tpmd][tv]
+            out << "\ttank: #{outval.round(1)}"
+            field = participants.map {|k, v| v[:performance][:tpmd][tv]}
+            out << ((field.inject(true) {|greatest, e| greatest && e <= outval}) ? "(*)" : "")
+          end
+        end # participants
+        out << "\n"
+      end # timeblock
       return out
     end
     
@@ -61,6 +103,19 @@ module RiotData
       JSON.parse( r.body )
     end
 
+    def team_out( team )
+      raise "invalid argument - should be a team (participant) hash" unless team.is_a?(Hash)
+      out = String.new
+      team_id = team.first[1][:team]
+      out << "\n\t\tTeam: #{team_id} #{'(** WIN **)' if teams[team_id][:winner]}"
+      team.each do |k, v|
+        out << "\n\t\t#{'%2.2s' % k}: #{'%6.6s' % v[:lane]} - #{'%-12.12s' % v[:role]}: "
+        out << "#{'%13.13s' % v[:champ]}"
+        out << "\t(#{v[:summoner]})" if v[:summoner]
+      end
+      return out
+    end
+
     def parse_match
       @match_type = {
         season: @raw['season'],
@@ -69,6 +124,7 @@ module RiotData
         map: MATCH_MAPS.fetch( @raw['mapId'], "unknown" )
       }
       @match_date = @raw['matchCreation']
+      @match_length = @raw['matchDuration']
       @participants = parse_participants
       @teams = parse_teams
       return
@@ -84,20 +140,32 @@ module RiotData
           champ: Match.champs[p['championId']][:name],
           role: p['timeline']['role'],
           lane: p['timeline']['lane'],
-          performance: p['timeline'],
+          performance: parse_performance(p['timeline']),
           stats: p['stats']
         }
       end  # participant processing
-      
+
       @raw['participantIdentities'].each do |p|
         pid = p['participantId']
-        ps[pid][:summ_id] = p['player']['summonerId']
-        ps[pid][:summoner] = p['player']['summonerName']
+        ps[pid][:summ_id] = p['player'] ? p['player']['summonerId'] : nil
+        ps[pid][:summoner] = p['player'] ? p['player']['summonerName'] : nil
       end # identity processing
       
       return ps
     end
 
+    def parse_performance( t_hash )
+      raise "bad timeline hash for participant" unless t_hash.is_a?( Hash )
+      p = Hash.new
+      DELTA_STATS.each do |dk, dkraw|
+        p[dk] = Hash.new
+        t_hash[dkraw].each do |k, v|
+          p[dk][TIME_BINS[k]] = v
+        end
+      end
+      return p
+    end
+    
     def parse_teams
       ts = Hash.new
       @raw['teams'].each do |t|
