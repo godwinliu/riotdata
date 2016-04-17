@@ -37,11 +37,13 @@ class TestMatch < Minitest::Test
   end
 
   def test_should_raise_if_match_not_found
-    flunk "TODO-write test"
+    should_not_find = "1234567891234"   # there shouldn't be any matches in the trillion range yet
+    assert_raises( RuntimeError) { setup_active_test( should_not_find ) }
   end
   
   def test_should_raise_unless_match_id_is_integer
-    flunk "TODO-write test"
+    should_not_allow = "abc-match"   # match_id's are supposed to be integers...
+    assert_raises( RuntimeError) { setup_active_test( should_not_allow ) }
   end
   
   private

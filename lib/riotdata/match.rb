@@ -34,9 +34,11 @@ module RiotData
     }
     
     def initialize( match_id = TEST_MATCH )
+      raise "invalid match_id" unless match_id.is_a?( Integer )
       @match_id = match_id
-      @raw = load_match
-      raise "error loading match" unless @raw
+      r = load_match
+      raise "error loading match" unless response_200ok?( r )
+      @raw =  JSON.parse( r.body )
       parse_match
     end
 
@@ -119,8 +121,7 @@ module RiotData
 
     def load_match
       uri = api_uri( MATCH_PATH + @match_id.to_s )
-      r = fetch_response(uri, true )
-      JSON.parse( r.body )
+      fetch_response(uri, true )
     end
 
     def team_out( team )
