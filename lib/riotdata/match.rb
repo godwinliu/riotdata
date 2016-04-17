@@ -8,7 +8,7 @@ require 'yaml'  # for debugging
 module RiotData
 
   MATCH_PATH = '/v2.2/match/'.freeze
-  TEST_MATCH = 2157410441   # a test match where
+  TEST_MATCH = 2157410441 
 
   
   class Match < RiotDataObject

@@ -78,19 +78,11 @@ module RiotData
       return form_uri( url, params )
     end
 
-    def static_uri( path, params = {} )
-      RiotDataObject.static_uri( path, params )
-    end
-    
     def self.api_uri( path, params = {} )
       url = SERVER_URL + API_PATH + REGION + path
       return form_uri( url, params )
     end
 
-    def api_uri( path, params = {} )
-      RiotDataObject.api_uri( path, params )
-    end
-    
     def self.fetch_response( uri, log = false )
       unless uri.is_a?( URI::HTTPS ) then raise "bad uri for data request"; end
       http = Net::HTTP.new(uri.host, uri.port)
@@ -100,10 +92,6 @@ module RiotData
       # TODO - implement some error handling here
     end
 
-    def fetch_response( uri, log = false)
-      RiotDataObject.fetch_response( uri, log )
-    end
-    
     def self.time_zone
       @@timezone
     end
@@ -114,6 +102,28 @@ module RiotData
       localtime = @@timezone.utc_to_local(riottime)
     end
 
+    # instance methods:
+    
+    def static_uri( path, params = {} )
+      RiotDataObject.static_uri( path, params )
+    end
+    
+    def api_uri( path, params = {} )
+      RiotDataObject.api_uri( path, params )
+    end
+    
+    def fetch_response( uri, log = false)
+      RiotDataObject.fetch_response( uri, log )
+    end
+
+    def response_valid?( r )
+      r.is_a?( Net::HTTPResponse )
+    end
+
+    def response_200ok?( r )
+      r.is_a?( Net::HTTPOK )
+    end
+    
     def word_wrap( text, options = {} )
       line_width = options.fetch(:line_width, 80)
       separator = options.fetch(:separator, "\n")

@@ -117,7 +117,7 @@ class TestRiotDataObject < Minitest::Test
     assert set_api_key(get_fake_key)
     assert uri = RiotData::RiotDataObject.api_uri( path )
     assert res = RiotData::RiotDataObject.fetch_response( uri )
-    assert_equal(Net::HTTPForbidden, res.class)
+    assert_equal(Net::HTTPForbidden, res.class)  # because it's a fake key
     assert_equal('403', res.code)
   end
 
@@ -134,14 +134,24 @@ class TestRiotDataObject < Minitest::Test
 
   def test_instances_should_be_able_to_fetch_api_responses
     o = setup_valid_instance
-    path = get_valid_path
-    assert uri = o.api_uri( path )
-    assert res = o.fetch_response( uri )
-    assert_equal(Net::HTTPOK, res.class)
-    assert_equal('200', res.code)
+    res = get_ok_response( o )
     assert JSON.parse( res.body ).is_a?( Hash ), "successful response should be parsable into a ruby hash"
   end
 
+  def test_instances_should_be_able_to_validate_response
+    o = setup_valid_instance
+    res = get_ok_response( o )
+    assert res.is_a?( Net::HTTPResponse ), "this should be a response"
+    assert o.response_valid?( res ), "should return that the response is valid"
+  end
+
+  def test_instances_should_be_able_to_check_response_ok
+    o = setup_valid_instance
+    res = get_ok_response( o )
+    assert res.is_a?( Net::HTTPOK ), "this should be a response"
+    assert o.response_200ok?( res ), "should return that the response is valid"
+  end
+  
   def test_should_convert_riot_time
     rtime = 1459520093000
     assert d = RDO.convert_riot_time( rtime )
@@ -192,13 +202,25 @@ class TestRiotDataObject < Minitest::Test
   private
 
   def get_valid_path
-    path = "/v1.4/summoner/by-name/grandfromage"
+    # should use a path that doesn't generate dynamic data (i.e. doesn't count to api limit)
+    #path = "/v1.4/summoner/by-name/grandfromage"
+    path = "/v1.2/champion/21"
   end
   
   def get_fake_path
     "/somepath"
   end
 
+  def get_ok_response( rdo )
+    raise "invalid argument" unless rdo.is_a?( RiotData::RiotDataObject )
+    path = get_valid_path
+    assert uri = rdo.api_uri( path )
+    assert res = rdo.fetch_response( uri, true )
+    assert_equal( Net::HTTPOK, res.class )
+    assert_equal( '200', res.code )
+    res
+  end
+  
   def set_api_key( key )
     RiotData::RiotDataObject.api_key = key
   end

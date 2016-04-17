@@ -11,7 +11,7 @@ class TestMatch < Minitest::Test
   include RiotDataTest
 
   RM = RiotData::Match
-  TEST_MATCH = 2157410441   # a test match where
+  TEST_MATCH = 2157410441
 
   def test_should_get_match
     assert (m = setup_active_test), "should be able to get the test match"
@@ -36,6 +36,14 @@ class TestMatch < Minitest::Test
     end
   end
 
+  def test_should_raise_if_match_not_found
+    flunk "TODO-write test"
+  end
+  
+  def test_should_raise_unless_match_id_is_integer
+    flunk "TODO-write test"
+  end
+  
   private
 
   def setup_active_test( match_id = TEST_MATCH )
