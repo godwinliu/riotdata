@@ -18,13 +18,16 @@ module RiotData
 
     def self.search_name( name )
       raise "search_name needs string for search" unless name.is_a?( String )
-      uri = api_uri( SUMMONER_SEARCHNAME_PATH + name )
+      clean_name = name.strip
+      raise "search string must have spaces removed" if (/\s+/ =~ clean_name)
+      raise "search string must be downcased" if (/[A-Z]/ =~ clean_name)
+      uri = api_uri( SUMMONER_SEARCHNAME_PATH + clean_name )
       r = fetch_response( uri, true )
       ro = JSON.parse( r.body )
       if ro['status'] && ro['status']['status_code'] == 404
         return nil
       else
-        return ro[name]['id']
+        return ro[clean_name]['id']
       end
     end
 

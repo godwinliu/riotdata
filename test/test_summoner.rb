@@ -34,6 +34,21 @@ class TestSummoner < Minitest::Test
     refute s_id = SC.search_name( unknown_summ )  # assumes unknown_summ is invalid search
   end
 
+  def test_strip_spaces_for_search
+    name_with_spaces = "does this search work"
+    # since we don't return any intermediate results, and there are no guaranteed
+    #  results for a name (they change at the target site), we'll instead write the
+    #  app to throw ane xception of the search term is malformed.
+    #  the Riot API indicates that space should be stripped, and that the searchprhase
+    #  should be downcased.
+    assert_raises( RuntimeError) {SC.search_name(name_with_spaces)}
+  end
+
+  def test_downcase_for_search
+    mixed_case_should_fail = "tHisiSmiXedCase"
+    assert_raises( RuntimeError) {SC.search_name(mixed_case_should_fail)}
+  end
+      
   def test_summonerclass_icon_url
     expect = STATIC_SERVER_URL + '/' + TEST_VER + '/img/profileicon/'
     assert_equal(expect, SC.icon_url)
