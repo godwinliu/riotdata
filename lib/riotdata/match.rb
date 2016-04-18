@@ -128,18 +128,18 @@ module RiotData
       raise "invalid argument - should be a team (participant) hash" unless team.is_a?(Hash)
       out = String.new
 
-      tk = team.values.inject(0) {|kills, e| kills + e[:stats]['kills'].to_i}
-      td = team.values.inject(0) {|deaths, e| deaths + e[:stats]['deaths'].to_i}
-      ta = team.values.inject(0) {|assists, e| assists + e[:stats]['assists'].to_i}
-      
       team_id = team.first[1][:team]
       out << "\n\t\tTeam: #{TEAM_DECODE[team_id]} "
+
+      tk = teams[team_id][:kills]
+      td = teams[team_id][:deaths]
+      ta = teams[team_id][:assists]
       out << " - #{kda_out(tk, td, ta)} - barons: #{teams[team_id][:barons]}, dragons: #{teams[team_id][:dragons]}"
       out << "\t#{'(** WIN **)' if teams[team_id][:winner]}"
       team.each do |k, v|
         out << "\n\t\t#{'%2.2s' % k}: #{'%6.6s' % v[:lane]} - #{'%-12.12s' % v[:role]}: "
         out << "#{'%13.13s' % v[:champ]}"
-        out << "  #{self.kda_out(v[:stats]['kills'].to_i, v[:stats]['deaths'].to_i, v[:stats]['assists'].to_i)}"
+        out << "  #{self.kda_out(v[:kills].to_i, v[:deaths].to_i, v[:assists].to_i)}"
         out << "\t(#{v[:summoner]})" if v[:summoner]
       end
       return out
@@ -170,6 +170,9 @@ module RiotData
           role: p['timeline']['role'],
           lane: p['timeline']['lane'],
           performance: parse_performance(p['timeline']),
+          kills: p['stats']['kills'],
+          deaths: p['stats']['deaths'],
+          assists: p['stats']['assists'],
           stats: p['stats']
         }
       end  # participant processing
@@ -198,12 +201,17 @@ module RiotData
     def parse_teams
       ts = Hash.new
       @raw['teams'].each do |t|
+        # note - participants need to be parsed before team
+        team_ps = self.participants.select {|k, v| v[:team] == t['teamId']}
         ts[t['teamId']] = {
           raw: t,
           winner: t['winner'],
           barons: t['baronKills'],
           dragons: t['dragonKills'],
-          turrets: t['towerKills']
+          turrets: t['towerKills'],
+          kills: team_ps.values.inject(0) {|kills, e| kills + e[:kills].to_i},
+          deaths: team_ps.values.inject(0) {|deaths, e| deaths + e[:deaths].to_i},
+          assists: team_ps.values.inject(0) {|assists, e| assists + e[:assists].to_i},
         }
       end
       return ts

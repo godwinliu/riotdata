@@ -34,6 +34,44 @@ class TestMatch < Minitest::Test
       assert (res = m.send(k)), "match should respond to :#{k}"
       assert res.is_a?( v ), "response to :#{k} should be of class '#{v}'"
     end
+
+    p_keys = {
+        team: Integer,
+        champ_id: Integer,
+        champ: String,
+        role: String,
+        lane: String,
+        performance: Hash,
+        kills: Integer,
+        deaths: Integer,
+        assists: Integer,
+        stats: Hash
+    }
+    assert m.participants.size > 0, "there should be at least one participant"
+    part1 = m.participants.first[1]
+    p_keys.each do |k, v|
+      assert part1.keys.include?( k ), "participants hash should include key: :'#{k}'"
+      assert part1[k].is_a?( v ), "participant value should be of class: '#{v}'"
+    end
+
+    team_keys = {
+      raw: Hash,
+      winner: nil,  # there is no boolean class
+      barons: Integer,
+      dragons: Integer,
+      turrets: Integer,
+      kills: Integer,
+      deaths: Integer,
+      assists: Integer
+    }
+    assert m.teams.size > 0
+    team1 = m.teams.first[1]
+    team_keys.each do |k, v|
+      assert team1.keys.include?( k ), "team hash should include key: :'#{k}'"
+      if v
+        assert team1[k].is_a?( v ), "the team value should be of class '#{v}'"
+      end
+    end
   end
 
   def test_should_raise_if_match_not_found
