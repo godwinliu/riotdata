@@ -9,7 +9,7 @@ require 'minitest/autorun'
 class TestSummoner < Minitest::Test
 
   # expected test version
-  TEST_VER = '6.7.1'
+  TEST_VER = '6.24.1'
   STATIC_SERVER_URL = 'http://ddragon.leagueoflegends.com/cdn'
     
   # save some typing

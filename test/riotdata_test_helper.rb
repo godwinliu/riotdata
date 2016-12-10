@@ -4,7 +4,7 @@
 #  (mixin) module for RiotData tests - common functionality
 
 module RiotDataTest
-  TESTED_VER = '6.7.1'
+  TESTED_VER = '6.24.1'
 
   def get_valid_key
     key = ENV['RIOT_KEY']
